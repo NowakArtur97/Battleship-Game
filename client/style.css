@@ -8,3 +8,52 @@ html {
   font-size: 10px;
   font-family: "Open Sans", Arial, sans-serif;
 }
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 150vh;
+  width: 100vw;
+
+  background-color: hsl(214, 100%, 62%);
+}
+
+.boards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+
+  height: 100%;
+  width: 90%;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  grid-column-gap: 5px;
+  grid-row-gap: 5px;
+
+  height: 50%;
+  width: 100%;
+}
+
+.board__player .square {
+  background-color: hsl(120, 100%, 25%);
+}
+
+.board__enemy .square {
+  background-color: hsl(0, 100%, 50%);
+}
+
+.square {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1em;
+  aspect-ratio: 1;
+
+  color: hsl(0, 0%, 100%);
+}
