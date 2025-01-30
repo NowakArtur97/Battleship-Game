@@ -14,7 +14,7 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 200vh;
+  height: 100vh;
   width: 100vw;
 }
 
@@ -26,38 +26,28 @@ html {
 
   height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 
 .board {
   display: grid;
   justify-content: center;
   align-items: center;
-  grid-template-columns: repeat(11, 1fr);
-  grid-template-rows: repeat(11, 1fr);
-  column-gap: 5px;
-  row-gap: 2.5px;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  padding: 0 -5px 0 0;
 
   height: 50%;
   width: 100%;
-
-  overflow-y: scroll;
-}
-
-.board--player {
-  padding: 0 0 5px 0;
-}
-
-.board--enemy {
-  padding: 5px 0;
 }
 
 .square {
   display: flex;
   justify-content: center;
   align-items: center;
+  place-self: center;
 
-  aspect-ratio: 1;
+  height: calc(360px / 11);
+  width: calc(360px / 11);
 
   font-size: 1em;
   color: hsl(0, 0%, 100%);
