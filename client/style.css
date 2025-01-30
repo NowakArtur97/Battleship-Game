@@ -34,7 +34,6 @@ html {
   align-items: center;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(7, 1fr);
-  padding: 0 -5px 0 0;
 
   height: 50%;
   width: 100%;
@@ -46,8 +45,8 @@ html {
   align-items: center;
   place-self: center;
 
-  height: calc(360px / 11);
-  width: calc(360px / 11);
+  height: calc(50vh / 10);
+  width: calc(50vh / 10);
 
   font-size: 1em;
   color: hsl(0, 0%, 100%);
@@ -59,4 +58,20 @@ html {
 
 .square--enemy {
   background-color: hsl(0, 100%, 50%);
+}
+
+@media (orientation: landscape) {
+  .boards {
+    flex-wrap: nowrap;
+  }
+
+  .board {
+    height: 100%;
+    width: 50%;
+  }
+
+  .square {
+    height: calc(50vw / 10);
+    width: calc(50vw / 10);
+  }
 }
