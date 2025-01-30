@@ -7,16 +7,15 @@
 html {
   font-size: 10px;
   font-family: "Open Sans", Arial, sans-serif;
+  background-color: hsl(214, 100%, 62%);
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 150vh;
+  height: 200vh;
   width: 100vw;
-
-  background-color: hsl(214, 100%, 62%);
 }
 
 .boards {
@@ -26,34 +25,48 @@ html {
   flex-wrap: wrap;
 
   height: 100%;
-  width: 90%;
+  width: 100%;
+  overflow: hidden;
 }
 
 .board {
   display: grid;
+  justify-content: center;
+  align-items: center;
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
-  grid-column-gap: 5px;
-  grid-row-gap: 5px;
+  column-gap: 5px;
+  row-gap: 2.5px;
 
   height: 50%;
   width: 100%;
+
+  overflow-y: scroll;
 }
 
-.board__player .square {
-  background-color: hsl(120, 100%, 25%);
+.board--player {
+  padding: 0 0 5px 0;
 }
 
-.board__enemy .square {
-  background-color: hsl(0, 100%, 50%);
+.board--enemy {
+  padding: 5px 0;
 }
 
 .square {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1em;
+
   aspect-ratio: 1;
 
+  font-size: 1em;
   color: hsl(0, 0%, 100%);
+}
+
+.square--player {
+  background-color: hsl(120, 100%, 25%);
+}
+
+.square--enemy {
+  background-color: hsl(0, 100%, 50%);
 }
