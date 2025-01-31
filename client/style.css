@@ -29,13 +29,18 @@ html {
 }
 
 .board {
+  height: 50%;
+  width: 100%;
+}
+
+.squares {
   display: grid;
   justify-content: center;
   align-items: center;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(7, 1fr);
 
-  height: 50%;
+  height: 100%;
   width: 100%;
 }
 
