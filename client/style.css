@@ -29,8 +29,33 @@ html {
 }
 
 .board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   height: 50%;
   width: 100%;
+}
+
+.board__game_option_button {
+  padding: 5% 10%;
+  border: 0.1rem solid hsl(0, 0%, 0%);
+  border-radius: 4px;
+  background-color: transparent;
+
+  color: hsl(0, 0%, 0%);
+  font-size: 1.5em;
+  white-space: nowrap;
+  text-align: center;
+
+  transition: 0.5s;
+}
+
+.board__game_option_button:hover {
+  background-color: hsl(0, 0%, 0%);
+  color: hsl(0, 0%, 100%);
+  transform: scale(1.25);
+  cursor: pointer;
 }
 
 .squares {
@@ -78,5 +103,17 @@ html {
   .square {
     height: calc(50vw / 10);
     width: calc(50vw / 10);
+  }
+}
+
+@media (min-width: 1024px) {
+  .board__game_option_button {
+    font-size: 2em;
+  }
+}
+
+@media (min-width: 720px) {
+  .board__game_option_button {
+    font-size: 2.5em;
   }
 }
