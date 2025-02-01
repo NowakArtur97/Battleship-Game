@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     #generateBoard = function (board, squareType) {
-      let letterCounter = "a";
+      let letterCounter = "A";
       const squares = [];
       for (let row = 0; row < 8; row++) {
         for (let column = 0; column < 8; column++) {
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (counter >= squares.length) {
           clearInterval(interval);
         }
-      }, 20);
+      }, 25);
     };
 
     #toggleOnOffElement(element) {

@@ -80,6 +80,15 @@ html {
 
   font-size: 1em;
   color: hsl(0, 0%, 100%);
+
+  transform: scale(0);
+  animation: scaleUp 0.5s forwards;
+}
+
+@keyframes scaleUp {
+  100% {
+    transform: scale(1);
+  }
 }
 
 .square--player {
