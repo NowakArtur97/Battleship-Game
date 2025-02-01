@@ -1,9 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const GAME_MODE = Object.freeze({
-    PLAYER_VS_PLAYER: Symbol("playerVsPlayer"),
-    PLAYER_VS_AI: Symbol("playerVsAI"),
-  });
-
   class Position {
     #x;
     #y;
@@ -63,59 +58,86 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const playerBoardGrid = document.querySelector(".board--player .squares");
-  const enemyBoardGrid = document.querySelector(".board--enemy .squares");
+  class Board {
+    static GAME_MODE = Object.freeze({
+      PLAYER_VS_PLAYER: Symbol("playerVsPlayer"),
+      PLAYER_VS_AI: Symbol("playerVsAI"),
+    });
 
-  const playerVsPlayerOptionBtn = document.querySelector(
-    "#player_vs_player_button"
-  );
-  const playerVsAIOptionBtn = document.querySelector("#player_vs_ai_button");
+    #gameMode;
+    #playerBoardGrid;
+    #enemyBoardGrid;
+    #playerVsPlayerOptionBtn;
+    #playerVsAIOptionBtn;
 
-  let gameMode;
+    constructor() {
+      this.#playerBoardGrid = document.querySelector(".board--player .squares");
+      this.#enemyBoardGrid = document.querySelector(".board--enemy .squares");
+      this.#playerVsPlayerOptionBtn = document.querySelector(
+        "#player_vs_player_button"
+      );
+      this.#playerVsAIOptionBtn = document.querySelector(
+        "#player_vs_ai_button"
+      );
+      this.#enemyBoardGrid = document.querySelector(".board--enemy .squares");
+      this.#playerVsPlayerOptionBtn.addEventListener("click", () =>
+        this.#startGameMode(Board.GAME_MODE.PLAYER_VS_PLAYER)
+      );
+      this.#playerVsAIOptionBtn.addEventListener("click", () =>
+        this.#startGameMode(Board.GAME_MODE.PLAYER_VS_AI)
+      );
+      this.#prepareBoardForGame();
+    }
 
-  toggleOnOffElement(playerBoardGrid);
-  toggleOnOffElement(enemyBoardGrid);
+    #prepareBoardForGame() {
+      this.#toggleOnOffElement(this.#playerBoardGrid);
+      this.#toggleOnOffElement(this.#enemyBoardGrid);
+    }
 
-  function startGameMode(chosenGameMode) {
-    gameMode = chosenGameMode;
-    toggleOnOffElement(playerVsPlayerOptionBtn);
-    toggleOnOffElement(playerVsAIOptionBtn);
-    playerBoardGrid.style.display = "grid";
-    generateBoard(playerBoardGrid, "player");
-    generateBoard(enemyBoardGrid, "enemy");
-  }
+    #startGameMode(chosenGameMode) {
+      this.#gameMode = chosenGameMode;
+      this.#generateBoards();
+    }
 
-  function generateBoard(board, squareType) {
-    let letterCounter = "a";
-    for (let row = 0; row < 8; row++) {
-      for (let column = 0; column < 8; column++) {
-        const square = document.createElement("div");
-        square.classList.add(...["square", `square--${squareType}`]);
-        if (row !== 0 && column !== 0) {
-          square.dataset.position = `${row}${column}`;
+    #generateBoards() {
+      this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
+      this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
+      this.#playerBoardGrid.style.display = "grid";
+      this.#generateBoard(this.#playerBoardGrid, "player");
+      this.#generateBoard(this.#enemyBoardGrid, "enemy");
+      this.#startPlacingShips();
+    }
+
+    #startPlacingShips() {}
+
+    #generateBoard = function (board, squareType) {
+      let letterCounter = "a";
+      for (let row = 0; row < 8; row++) {
+        for (let column = 0; column < 8; column++) {
+          const square = document.createElement("div");
+          square.classList.add(...["square", `square--${squareType}`]);
+          if (row !== 0 && column !== 0) {
+            square.dataset.position = `${row}${column}`;
+            // square.addEventListener("click", positionShip);
+          }
+          if (row === 0 && column !== 0) {
+            square.textContent = column;
+          }
+          if (column === 0 && row !== 0) {
+            square.textContent = String.fromCharCode(
+              letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
+            );
+          }
+          board.appendChild(square);
         }
-        if (row === 0 && column !== 0) {
-          square.textContent = column;
-        }
-        if (column === 0 && row !== 0) {
-          square.textContent = String.fromCharCode(
-            letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
-          );
-        }
-        board.appendChild(square);
       }
+    };
+
+    #toggleOnOffElement(element) {
+      const { style } = element;
+      style.display = style.display === "none" ? "block" : "none";
     }
   }
 
-  function toggleOnOffElement(element) {
-    const { style } = element;
-    style.display = style.display === "none" ? "block" : "none";
-  }
-
-  playerVsPlayerOptionBtn.addEventListener("click", () =>
-    startGameMode(GAME_MODE.PLAYER_VS_PLAYER)
-  );
-  playerVsAIOptionBtn.addEventListener("click", () =>
-    startGameMode(GAME_MODE.PLAYER_VS_AI)
-  );
+  const board = new Board();
 });
