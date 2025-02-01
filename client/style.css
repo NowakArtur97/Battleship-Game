@@ -116,13 +116,15 @@ html {
 }
 
 @media (min-width: 1024px) {
-  .board__game_option_button {
+  .board__game_option_button,
+  .square {
     font-size: 2em;
   }
 }
 
 @media (min-width: 720px) {
-  .board__game_option_button {
+  .board__game_option_button,
+  .square {
     font-size: 2.5em;
   }
 }
