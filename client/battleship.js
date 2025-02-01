@@ -4,6 +4,65 @@ document.addEventListener("DOMContentLoaded", () => {
     PLAYER_VS_AI: Symbol("playerVsAI"),
   });
 
+  class Position {
+    #x;
+    #y;
+
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    get asString() {
+      return `${this.#x}${this.#y}`;
+    }
+  }
+
+  class Ship {
+    #name;
+    #length;
+    #positions = [];
+
+    constructor(name, length) {
+      this.name = name;
+      this.length = length;
+    }
+
+    get name() {
+      return this.#name;
+    }
+
+    get length() {
+      return this.#length;
+    }
+
+    get positions() {
+      return this.#positions;
+    }
+
+    addPosition(position) {
+      this.#positions.add(position);
+    }
+  }
+
+  class Fleet {
+    #ships = [];
+
+    constructor() {
+      this.ships = [
+        new Ship("carrier", 5),
+        new Ship("battleship", 4),
+        new Ship("cruiser", 3),
+        new Ship("submarine", 3),
+        new Ship("destroyer", 2),
+      ];
+    }
+
+    get nextToLocate() {
+      return this.#ships.find((ship) => ship.po);
+    }
+  }
+
   const playerBoardGrid = document.querySelector(".board--player .squares");
   const enemyBoardGrid = document.querySelector(".board--enemy .squares");
 
