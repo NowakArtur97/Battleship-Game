@@ -69,6 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
     #enemyBoardGrid;
     #playerVsPlayerOptionBtn;
     #playerVsAIOptionBtn;
+    #horizontalShipPlacementBtn;
+    #verticalShipPlacementBtn;
 
     constructor() {
       this.#playerBoardGrid = document.querySelector(".board--player .squares");
@@ -86,12 +88,20 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#playerVsAIOptionBtn.addEventListener("click", () =>
         this.#startGameMode(Board.GAME_MODE.PLAYER_VS_AI)
       );
+      this.#horizontalShipPlacementBtn = document.querySelector(
+        "#horizontal_ship_placement_button"
+      );
+      this.#verticalShipPlacementBtn = document.querySelector(
+        "#vertital_ship_placement_button"
+      );
       this.#prepareBoardForGame();
     }
 
     #prepareBoardForGame() {
       this.#toggleOnOffElement(this.#playerBoardGrid);
       this.#toggleOnOffElement(this.#enemyBoardGrid);
+      this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
+      this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
     }
 
     #startGameMode(chosenGameMode) {
@@ -108,7 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#startPlacingShips();
     }
 
-    #startPlacingShips() {}
+    #startPlacingShips() {
+      this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
+      this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
+    }
 
     #generateBoard = function (board, squareType) {
       let letterCounter = "a";
