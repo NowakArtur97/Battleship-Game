@@ -28,19 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateBoard(board, squareType) {
     let letterCounter = "a";
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
         const square = document.createElement("div");
         square.classList.add(...["square", `square--${squareType}`]);
-        if (i !== 0 && j !== 0) {
-          square.dataset.position = `${i}${j}`;
+        if (row !== 0 && column !== 0) {
+          square.dataset.position = `${row}${column}`;
         }
-        if (i === 0 && j !== 0) {
-          square.textContent = j;
+        if (row === 0 && column !== 0) {
+          square.textContent = column;
         }
-        if (j === 0 && i !== 0) {
+        if (column === 0 && row !== 0) {
           square.textContent = String.fromCharCode(
-            letterCounter.charCodeAt(letterCounter.length - 1) + i - 1
+            letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
           );
         }
         board.appendChild(square);
