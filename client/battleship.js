@@ -4,10 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     PLAYER_VS_AI: Symbol("playerVsAI"),
   });
 
-  const playerBoard = document.querySelector(".board--player");
-  const playerBoardGrid = playerBoard.querySelector(".squares");
-  const enemyBoard = document.querySelector(".board--enemy");
-  const enemyBoardGrid = enemyBoard.querySelector(".squares");
+  const playerBoardGrid = document.querySelector(".board--player .squares");
+  const enemyBoardGrid = document.querySelector(".board--enemy .squares");
 
   const playerVsPlayerOptionBtn = document.querySelector(
     "#player_vs_player_button"
@@ -23,6 +21,22 @@ document.addEventListener("DOMContentLoaded", () => {
     gameMode = chosenGameMode;
     toggleOnOffElement(playerVsPlayerOptionBtn);
     toggleOnOffElement(playerVsAIOptionBtn);
+    playerBoardGrid.style.display = "grid";
+    generateBoard();
+  }
+
+  function generateBoard() {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const square = document.createElement("div");
+        square.classList.add(...["square", "square--player"]);
+        if (i !== 0 && j !== 0) {
+          square.dataset.position = `${i}${j}`;
+          square.textContent = `${i}${j}`;
+        }
+        playerBoardGrid.appendChild(square);
+      }
+    }
   }
 
   function toggleOnOffElement(element) {
