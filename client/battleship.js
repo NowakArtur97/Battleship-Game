@@ -27,13 +27,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function generateBoard(board, squareType) {
+    let letterCounter = "a";
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         const square = document.createElement("div");
         square.classList.add(...["square", `square--${squareType}`]);
         if (i !== 0 && j !== 0) {
           square.dataset.position = `${i}${j}`;
-          square.textContent = `${i}${j}`;
+        }
+        if (i === 0 && j !== 0) {
+          square.textContent = j;
+        }
+        if (j === 0 && i !== 0) {
+          square.textContent = String.fromCharCode(
+            letterCounter.charCodeAt(letterCounter.length - 1) + i - 1
+          );
         }
         board.appendChild(square);
       }
