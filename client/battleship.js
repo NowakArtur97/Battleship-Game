@@ -114,7 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoardGrid.style.display = "grid";
       this.#generateBoard(this.#playerBoardGrid, "player");
-      this.#generateBoard(this.#enemyBoardGrid, "enemy");
+      // TODO: Generate later
+      // this.#generateBoard(this.#enemyBoardGrid, "enemy");
       this.#startPlacingShips();
     }
 
@@ -125,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #generateBoard = function (board, squareType) {
       let letterCounter = "a";
+      const squares = [];
       for (let row = 0; row < 8; row++) {
         for (let column = 0; column < 8; column++) {
           const square = document.createElement("div");
@@ -141,9 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
               letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
             );
           }
-          board.appendChild(square);
+          squares.push(square);
         }
       }
+      let counter = 0;
+      let interval = setInterval(() => {
+        board.appendChild(squares[counter++]);
+        if (counter >= squares.length) {
+          clearInterval(interval);
+        }
+      }, 20);
     };
 
     #toggleOnOffElement(element) {
