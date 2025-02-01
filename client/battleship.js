@@ -22,19 +22,20 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleOnOffElement(playerVsPlayerOptionBtn);
     toggleOnOffElement(playerVsAIOptionBtn);
     playerBoardGrid.style.display = "grid";
-    generateBoard();
+    generateBoard(playerBoardGrid, "player");
+    generateBoard(enemyBoardGrid, "enemy");
   }
 
-  function generateBoard() {
+  function generateBoard(board, squareType) {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         const square = document.createElement("div");
-        square.classList.add(...["square", "square--player"]);
+        square.classList.add(...["square", `square--${squareType}`]);
         if (i !== 0 && j !== 0) {
           square.dataset.position = `${i}${j}`;
           square.textContent = `${i}${j}`;
         }
-        playerBoardGrid.appendChild(square);
+        board.appendChild(square);
       }
     }
   }
