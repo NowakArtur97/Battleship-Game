@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     #board;
     #gameMode;
-    #shipPlacementDirection = "horizontally";
+    #shipPlacementDirection = "vertically";
     #player;
     #enemy;
 
@@ -218,9 +218,11 @@ document.addEventListener("DOMContentLoaded", () => {
       squares
         .filter((square) => square.textContent === "")
         .forEach((square) => {
+          square.addEventListener("click", () => {
+            game.tryToPlaceShip(position);
+          });
+
           square.addEventListener("mouseover", () => {
-            console.log(game);
-            // this.#game.tryToPlaceShip(position);
             const numberOfSquares = game.numberOfSquares;
             let i = 0;
             const shipDirection = game.shipDirection;
@@ -232,12 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 i++;
               }
             } else {
+              const indexOfSquare = squares.indexOf(square);
+              square.classList.add(`square--hover`);
+              for (let i = 1; i < numberOfSquares; i++) {
+                const el = squares[indexOfSquare + 8 * i];
+                if (el) {
+                  el.classList.add(`square--hover`);
+                }
+              }
             }
           });
 
           square.addEventListener("mouseleave", () => {
-            console.log(game);
-            // this.#game.tryToPlaceShip(position);
             const numberOfSquares = game.numberOfSquares;
             let i = 0;
             const shipDirection = game.shipDirection;
@@ -249,6 +257,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 i++;
               }
             } else {
+              const indexOfSquare = squares.indexOf(square);
+              square.classList.remove(`square--hover`);
+              for (let i = 1; i < numberOfSquares; i++) {
+                const el = squares[indexOfSquare + 8 * i];
+                if (el) {
+                  el.classList.remove(`square--hover`);
+                }
+              }
             }
           });
         });

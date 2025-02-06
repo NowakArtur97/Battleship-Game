@@ -37,6 +37,14 @@ html {
   width: 100%;
 }
 
+.board__game_option {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* width: 100%; */
+}
+
 .board__game_option_button {
   padding: 5% 10%;
   border: 0.1rem solid hsl(0, 0%, 0%);
