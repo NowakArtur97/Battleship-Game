@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     #board;
     #gameMode;
-    #shipPlacementDirection;
+    #shipPlacementDirection = "horizontally";
     #player;
     #enemy;
 
@@ -98,9 +98,17 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#placeShipsOnBoard();
     }
 
+    get shipDirection() {
+      return this.#shipPlacementDirection;
+    }
+
     set shipDirection(direction) {
       this.#shipPlacementDirection = direction;
       console.log(direction);
+    }
+
+    get numberOfSquares() {
+      return 5;
     }
 
     tryToPlaceShip(position) {
@@ -120,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
     #playerVsAIOptionBtn;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
-    #playerGrid = [];
 
     constructor() {
       this.#playerBoardGrid = document.querySelector(".board--player .squares");
@@ -161,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoardGrid.style.display = "grid";
-      this.#generateBoard(this.#playerBoardGrid, "player", this.#playerGrid);
+      this.#generateBoard(this.#playerBoardGrid, "player");
       // TODO: Generate later
       // this.#generateBoard(this.#enemyBoardGrid, "enemy");
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
@@ -178,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#game.shipDirection = direction;
     }
 
-    #generateBoard = function (board, squareType, grid) {
+    #generateBoard = function (board, squareType) {
       let letterCounter = "A";
       const squares = [];
       for (let row = 0; row < 8; row++) {
@@ -188,10 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (row !== 0 && column !== 0) {
             const position = new Position(column, row);
             square.dataset.position = position.asString;
-            square.addEventListener("click", () => {
-              this.#game.tryToPlaceShip(position);
-            });
-            grid.push(square);
           }
           if (row === 0 && column !== 0) {
             square.textContent = column;
@@ -211,6 +214,44 @@ document.addEventListener("DOMContentLoaded", () => {
           clearInterval(interval);
         }
       }, 25);
+      const game = this.#game;
+      squares
+        .filter((square) => square.textContent === "")
+        .forEach((square) => {
+          square.addEventListener("mouseover", () => {
+            console.log(game);
+            // this.#game.tryToPlaceShip(position);
+            const numberOfSquares = game.numberOfSquares;
+            let i = 0;
+            const shipDirection = game.shipDirection;
+            if (shipDirection === "horizontally") {
+              let el = square;
+              while (i < numberOfSquares) {
+                el.classList.add(`square--hover`);
+                el = el.nextSibling;
+                i++;
+              }
+            } else {
+            }
+          });
+
+          square.addEventListener("mouseleave", () => {
+            console.log(game);
+            // this.#game.tryToPlaceShip(position);
+            const numberOfSquares = game.numberOfSquares;
+            let i = 0;
+            const shipDirection = game.shipDirection;
+            if (shipDirection === "horizontally") {
+              let el = square;
+              while (i < numberOfSquares) {
+                el.classList.remove(`square--hover`);
+                el = el.nextSibling;
+                i++;
+              }
+            } else {
+            }
+          });
+        });
     };
 
     #toggleOnOffElement(element) {
