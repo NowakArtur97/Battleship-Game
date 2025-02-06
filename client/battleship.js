@@ -19,8 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
     #positions = [];
 
     constructor(name, length) {
-      this.name = name;
-      this.length = length;
+      this.#name = name;
+      this.#length = length;
     }
 
     get name() {
@@ -56,21 +56,71 @@ document.addEventListener("DOMContentLoaded", () => {
     get nextToLocate() {
       return this.#ships.find((ship) => ship.po);
     }
+
+    get areAllShipsPlacedOnBoard() {
+      return this.#ships.every((ship) => ship.positions().length !== 0);
+    }
   }
 
-  class Board {
+  class Player {
+    #fleet;
+
+    constructor() {
+      this.#fleet = new Fleet();
+    }
+
+    get fleet() {
+      return this.#fleet;
+    }
+  }
+
+  class Game {
     static GAME_MODE = Object.freeze({
       PLAYER_VS_PLAYER: Symbol("playerVsPlayer"),
       PLAYER_VS_AI: Symbol("playerVsAI"),
     });
-
+    #board;
     #gameMode;
+    #shipPlacementDirection;
+    #player;
+    #enemy;
+
+    constructor(board) {
+      this.#board = board;
+      this.#player = new Player();
+      this.#enemy = new Player();
+      this.#board.prepareBoardForGame();
+    }
+
+    set gameMode(gameMode) {
+      this.#gameMode = gameMode;
+      this.#board.generateBoards();
+      this.#placeShipsOnBoard();
+    }
+
+    set shipDirection(direction) {
+      this.#shipPlacementDirection = direction;
+      console.log(direction);
+    }
+
+    tryToPlaceShip(position) {
+      console.log(position);
+    }
+
+    #placeShipsOnBoard() {
+      // while (this.#player.fleet.areAllShipsPlacedOnBoard) {}
+    }
+  }
+
+  class Board {
+    #game;
     #playerBoardGrid;
     #enemyBoardGrid;
     #playerVsPlayerOptionBtn;
     #playerVsAIOptionBtn;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
+    #playerGrid = [];
 
     constructor() {
       this.#playerBoardGrid = document.querySelector(".board--player .squares");
@@ -83,10 +133,10 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#enemyBoardGrid = document.querySelector(".board--enemy .squares");
       this.#playerVsPlayerOptionBtn.addEventListener("click", () =>
-        this.#startGameMode(Board.GAME_MODE.PLAYER_VS_PLAYER)
+        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_PLAYER)
       );
       this.#playerVsAIOptionBtn.addEventListener("click", () =>
-        this.#startGameMode(Board.GAME_MODE.PLAYER_VS_AI)
+        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_AI)
       );
       this.#horizontalShipPlacementBtn = document.querySelector(
         "#horizontal_ship_placement_button"
@@ -94,10 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#verticalShipPlacementBtn = document.querySelector(
         "#vertital_ship_placement_button"
       );
-      this.#prepareBoardForGame();
     }
 
-    #prepareBoardForGame() {
+    prepareBoardForGame() {
       this.#toggleOnOffElement(this.#playerBoardGrid);
       this.#toggleOnOffElement(this.#enemyBoardGrid);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
@@ -105,26 +154,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     #startGameMode(chosenGameMode) {
-      this.#gameMode = chosenGameMode;
-      this.#generateBoards();
+      this.#game.gameMode = chosenGameMode;
     }
 
-    #generateBoards() {
+    generateBoards() {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoardGrid.style.display = "grid";
-      this.#generateBoard(this.#playerBoardGrid, "player");
+      this.#generateBoard(this.#playerBoardGrid, "player", this.#playerGrid);
       // TODO: Generate later
       // this.#generateBoard(this.#enemyBoardGrid, "enemy");
-      this.#startPlacingShips();
-    }
-
-    #startPlacingShips() {
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
+      this.#horizontalShipPlacementBtn.addEventListener("click", () =>
+        this.setShipDirection("horizontally")
+      );
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
+      this.#verticalShipPlacementBtn.addEventListener("click", () =>
+        this.setShipDirection("vertically")
+      );
     }
 
-    #generateBoard = function (board, squareType) {
+    setShipDirection(direction) {
+      this.#game.shipDirection = direction;
+    }
+
+    #generateBoard = function (board, squareType, grid) {
       let letterCounter = "A";
       const squares = [];
       for (let row = 0; row < 8; row++) {
@@ -132,8 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
           const square = document.createElement("div");
           square.classList.add(...["square", `square--${squareType}`]);
           if (row !== 0 && column !== 0) {
-            square.dataset.position = `${row}${column}`;
-            // square.addEventListener("click", positionShip);
+            const position = new Position(column, row);
+            square.dataset.position = position.asString;
+            square.addEventListener("click", () => {
+              this.#game.tryToPlaceShip(position);
+            });
+            grid.push(square);
           }
           if (row === 0 && column !== 0) {
             square.textContent = column;
@@ -159,7 +217,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const { style } = element;
       style.display = style.display === "none" ? "block" : "none";
     }
+
+    set game(game) {
+      this.#game = game;
+    }
   }
 
   const board = new Board();
+  const game = new Game(board);
+  board.game = game;
 });
