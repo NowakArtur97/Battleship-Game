@@ -4,12 +4,29 @@ document.addEventListener("DOMContentLoaded", () => {
     #y;
 
     constructor(x, y) {
-      this.x = x;
-      this.y = y;
+      this.#x = x;
+      this.#y = y;
+    }
+
+    get x() {
+      return this.#x;
+    }
+
+    get y() {
+      return this.#y;
     }
 
     get asString() {
       return `${this.#x}${this.#y}`;
+    }
+
+    static fromString(positionAsString) {
+      const x = positionAsString.slice(0, positionAsString.length / 2);
+      const y = positionAsString.slice(
+        positionAsString.length / 2,
+        positionAsString.length
+      );
+      return new Position(x, y);
     }
   }
 
@@ -112,7 +129,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tryToPlaceShip(position) {
-      console.log(position);
+      let canPlace =
+        this.#shipPlacementDirection == "horizontally"
+          ? +position.x + this.numberOfSquares <= 8
+          : +position.y + this.numberOfSquares <= 8;
+      console.log(canPlace);
+      if (!canPlace) {
+        return;
+      }
+      // for (let row = 0; row < 8; row++) {
+      //   for (let column = 0; column < 8; column++) {}
+      // }
     }
 
     #placeShipsOnBoard() {
@@ -196,10 +223,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const position = new Position(column, row);
             square.dataset.position = position.asString;
           }
-          if (row === 0 && column !== 0) {
+          const isInFirstRow = row === 0 && column !== 0;
+          if (isInFirstRow) {
             square.textContent = column;
           }
-          if (column === 0 && row !== 0) {
+          const isInFirstColumn = column === 0 && row !== 0;
+          if (isInFirstColumn) {
             square.textContent = String.fromCharCode(
               letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
             );
@@ -219,7 +248,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .filter((square) => square.textContent === "")
         .forEach((square) => {
           square.addEventListener("click", () => {
-            // game.tryToPlaceShip(position);
+            const position = Position.fromString(square.dataset.position);
+            game.tryToPlaceShip(position);
           });
 
           square.addEventListener("mouseover", () => {
