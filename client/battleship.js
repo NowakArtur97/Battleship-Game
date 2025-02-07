@@ -33,11 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
   class Ship {
     #name;
     #length;
-    #positions = [];
+    #positions;
 
     constructor(name, length) {
       this.#name = name;
       this.#length = length;
+      this.#positions = [];
     }
 
     get name() {
@@ -52,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return this.#positions;
     }
 
-    addPosition(position) {
-      this.#positions.add(position);
+    set positions(positions) {
+      this.#positions = positions;
     }
   }
 
@@ -61,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     #ships = [];
 
     constructor() {
-      this.ships = [
+      this.#ships = [
         new Ship("carrier", 5),
         new Ship("battleship", 4),
         new Ship("cruiser", 3),
@@ -71,11 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     get nextToLocate() {
-      return this.#ships.find((ship) => ship.po);
+      return this.#ships.find((ship) => ship.positions.length === 0);
     }
 
     get areAllShipsPlacedOnBoard() {
-      return this.#ships.every((ship) => ship.positions().length !== 0);
+      return this.#ships.every((ship) => ship.positions.length !== 0);
     }
   }
 
@@ -124,22 +125,35 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log(direction);
     }
 
-    get numberOfSquares() {
-      return 5;
+    get numberOfSquaresToPlaceNextShip() {
+      const nextToLocate = this.#player.fleet.nextToLocate;
+      return nextToLocate !== undefined ? nextToLocate.length : 0;
     }
 
     tryToPlaceShip(position) {
+      const numberOfSquaresToPlaceNextShip = this
+        .numberOfSquaresToPlaceNextShip;
       let canPlace =
         this.#shipPlacementDirection == "horizontally"
-          ? +position.x + this.numberOfSquares <= 8
-          : +position.y + this.numberOfSquares <= 8;
+          ? +position.x + numberOfSquaresToPlaceNextShip <= 8
+          : +position.y + numberOfSquaresToPlaceNextShip <= 8;
       console.log(canPlace);
       if (!canPlace) {
-        return;
+        return false;
       }
-      // for (let row = 0; row < 8; row++) {
-      //   for (let column = 0; column < 8; column++) {}
-      // }
+      const positions = [];
+      if (this.#shipPlacementDirection == "horizontally") {
+        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+          positions.push(new Position(position.x, position.y + i));
+        }
+      } else {
+        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+          positions.push(new Position(position.x + i, position.y));
+        }
+      }
+      this.#player.fleet.nextToLocate.positions = positions;
+      console.log(positions);
+      return true;
     }
 
     #placeShipsOnBoard() {
@@ -253,23 +267,24 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           square.addEventListener("mouseover", () => {
-            const numberOfSquares = game.numberOfSquares;
+            const numberOfSquaresToPlaceNextShip =
+              game.numberOfSquaresToPlaceNextShip;
             const shipDirection = game.shipDirection;
             let el = square;
             const squaresToSelect = [];
             if (shipDirection === "horizontally") {
-              for (let i = 0; i < numberOfSquares; i++) {
+              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
                 if (el && el.textContent === "") {
                   squaresToSelect.push(el);
                 }
                 if (el.textContent !== "") {
-                  i = numberOfSquares;
+                  i = numberOfSquaresToPlaceNextShip;
                 }
                 el = el.nextSibling;
               }
             } else {
               const indexOfSquare = squares.indexOf(square);
-              for (let i = 0; i < numberOfSquares; i++) {
+              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
                 if (el && el.textContent === "") {
                   squaresToSelect.push(el);
                 }
@@ -277,18 +292,19 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             }
             const cssClass =
-              squaresToSelect.length === numberOfSquares
+              squaresToSelect.length === numberOfSquaresToPlaceNextShip
                 ? `square--valid`
                 : `square--invalid`;
             squaresToSelect.forEach((el) => el.classList.add(cssClass));
           });
 
           square.addEventListener("mouseleave", () => {
-            const numberOfSquares = game.numberOfSquares;
+            const numberOfSquaresToPlaceNextShip =
+              game.numberOfSquaresToPlaceNextShip;
             const shipDirection = game.shipDirection;
             let el = square;
             if (shipDirection === "horizontally") {
-              for (let i = 0; i < numberOfSquares; i++) {
+              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
                 if (el) {
                   el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
@@ -296,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             } else {
               const indexOfSquare = squares.indexOf(square);
-              for (let i = 0; i < numberOfSquares; i++) {
+              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
                 if (el) {
                   el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
