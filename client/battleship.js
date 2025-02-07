@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     #board;
     #gameMode;
-    #shipPlacementDirection = "vertically";
+    #shipPlacementDirection = "horizontally";
     #player;
     #enemy;
 
@@ -219,32 +219,38 @@ document.addEventListener("DOMContentLoaded", () => {
         .filter((square) => square.textContent === "")
         .forEach((square) => {
           square.addEventListener("click", () => {
-            game.tryToPlaceShip(position);
+            // game.tryToPlaceShip(position);
           });
 
           square.addEventListener("mouseover", () => {
             const numberOfSquares = game.numberOfSquares;
             const shipDirection = game.shipDirection;
             let el = square;
+            const squaresToSelect = [];
             if (shipDirection === "horizontally") {
               for (let i = 0; i < numberOfSquares; i++) {
-                if (el) {
-                  el.classList.add(`square--hover`);
+                if (el && el.textContent === "") {
+                  squaresToSelect.push(el);
+                }
+                if (el.textContent !== "") {
+                  i = numberOfSquares;
                 }
                 el = el.nextSibling;
-                if (el.textContent !== "") {
-                  return;
-                }
               }
             } else {
               const indexOfSquare = squares.indexOf(square);
               for (let i = 0; i < numberOfSquares; i++) {
-                if (el) {
-                  el.classList.add(`square--hover`);
+                if (el && el.textContent === "") {
+                  squaresToSelect.push(el);
                 }
                 el = squares[indexOfSquare + 8 * (i + 1)];
               }
             }
+            const cssClass =
+              squaresToSelect.length === numberOfSquares
+                ? `square--valid`
+                : `square--invalid`;
+            squaresToSelect.forEach((el) => el.classList.add(cssClass));
           });
 
           square.addEventListener("mouseleave", () => {
@@ -254,18 +260,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (shipDirection === "horizontally") {
               for (let i = 0; i < numberOfSquares; i++) {
                 if (el) {
-                  el.classList.remove(`square--hover`);
+                  el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
                 el = el.nextSibling;
-                if (el.textContent !== "") {
-                  return;
-                }
               }
             } else {
               const indexOfSquare = squares.indexOf(square);
               for (let i = 0; i < numberOfSquares; i++) {
                 if (el) {
-                  el.classList.remove(`square--hover`);
+                  el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
                 el = squares[indexOfSquare + 8 * (i + 1)];
               }
