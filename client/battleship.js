@@ -224,46 +224,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
           square.addEventListener("mouseover", () => {
             const numberOfSquares = game.numberOfSquares;
-            let i = 0;
             const shipDirection = game.shipDirection;
+            let el = square;
             if (shipDirection === "horizontally") {
-              let el = square;
-              while (i < numberOfSquares) {
-                el.classList.add(`square--hover`);
-                el = el.nextSibling;
-                i++;
-              }
-            } else {
-              const indexOfSquare = squares.indexOf(square);
-              square.classList.add(`square--hover`);
-              for (let i = 1; i < numberOfSquares; i++) {
-                const el = squares[indexOfSquare + 8 * i];
+              for (let i = 0; i < numberOfSquares; i++) {
                 if (el) {
                   el.classList.add(`square--hover`);
                 }
+                el = el.nextSibling;
+                if (el.textContent !== "") {
+                  return;
+                }
+              }
+            } else {
+              const indexOfSquare = squares.indexOf(square);
+              for (let i = 0; i < numberOfSquares; i++) {
+                if (el) {
+                  el.classList.add(`square--hover`);
+                }
+                el = squares[indexOfSquare + 8 * (i + 1)];
               }
             }
           });
 
           square.addEventListener("mouseleave", () => {
             const numberOfSquares = game.numberOfSquares;
-            let i = 0;
             const shipDirection = game.shipDirection;
+            let el = square;
             if (shipDirection === "horizontally") {
-              let el = square;
-              while (i < numberOfSquares) {
-                el.classList.remove(`square--hover`);
-                el = el.nextSibling;
-                i++;
-              }
-            } else {
-              const indexOfSquare = squares.indexOf(square);
-              square.classList.remove(`square--hover`);
-              for (let i = 1; i < numberOfSquares; i++) {
-                const el = squares[indexOfSquare + 8 * i];
+              for (let i = 0; i < numberOfSquares; i++) {
                 if (el) {
                   el.classList.remove(`square--hover`);
                 }
+                el = el.nextSibling;
+                if (el.textContent !== "") {
+                  return;
+                }
+              }
+            } else {
+              const indexOfSquare = squares.indexOf(square);
+              for (let i = 0; i < numberOfSquares; i++) {
+                if (el) {
+                  el.classList.remove(`square--hover`);
+                }
+                el = squares[indexOfSquare + 8 * (i + 1)];
               }
             }
           });
