@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     static fromString(positionAsString) {
-      const x = positionAsString.slice(0, positionAsString.length / 2);
-      const y = positionAsString.slice(
+      const x = +positionAsString.slice(0, positionAsString.length / 2);
+      const y = +positionAsString.slice(
         positionAsString.length / 2,
         positionAsString.length
       );
@@ -78,6 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
     get areAllShipsPlacedOnBoard() {
       return this.#ships.every((ship) => ship.positions.length !== 0);
     }
+
+    get fleetPositions() {
+      return this.#ships.map((ship) => ship.positions).flat(1);
+    }
   }
 
   class Player {
@@ -130,30 +134,44 @@ document.addEventListener("DOMContentLoaded", () => {
       return nextToLocate !== undefined ? nextToLocate.length : 0;
     }
 
-    tryToPlaceShip(position) {
+    tryToPlaceShip(startingPosition) {
       const numberOfSquaresToPlaceNextShip = this
         .numberOfSquaresToPlaceNextShip;
+      const { x, y } = startingPosition;
       let canPlace =
         this.#shipPlacementDirection == "horizontally"
-          ? +position.x + numberOfSquaresToPlaceNextShip <= 8
-          : +position.y + numberOfSquaresToPlaceNextShip <= 8;
-      console.log(canPlace);
+          ? x + numberOfSquaresToPlaceNextShip <= 8
+          : y + numberOfSquaresToPlaceNextShip <= 8;
       if (!canPlace) {
         return false;
       }
       const positions = [];
+      const fleetPositions = this.#player.fleet.fleetPositions;
       if (this.#shipPlacementDirection == "horizontally") {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-          positions.push(new Position(position.x, position.y + i));
+          const position = new Position(x + i, y);
+          if (fleetPositions.some((pos) => pos === position)) {
+            canPlace = false;
+          } else {
+            positions.push(position);
+          }
         }
       } else {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-          positions.push(new Position(position.x + i, position.y));
+          const position = new Position(x, y + i);
+          if (fleetPositions.some((pos) => pos === position)) {
+            canPlace = false;
+          } else {
+            positions.push(position);
+          }
         }
       }
-      this.#player.fleet.nextToLocate.positions = positions;
-      console.log(positions);
-      return true;
+      if (canPlace) {
+        this.#player.fleet.nextToLocate.positions = positions;
+      }
+      console.log(this.#player.fleet.fleetPositions);
+      console.log(canPlace);
+      return canPlace;
     }
 
     #placeShipsOnBoard() {
