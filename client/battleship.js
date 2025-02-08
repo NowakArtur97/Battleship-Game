@@ -150,7 +150,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (this.#shipPlacementDirection == "horizontally") {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
           const position = new Position(x + i, y);
-          if (fleetPositions.some((pos) => pos === position)) {
+          if (
+            fleetPositions.some(
+              (pos) => pos.x === position.x && pos.y === position.y
+            )
+          ) {
             canPlace = false;
           } else {
             positions.push(position);
@@ -159,7 +163,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
           const position = new Position(x, y + i);
-          if (fleetPositions.some((pos) => pos === position)) {
+          if (
+            fleetPositions.some(
+              (pos) => pos.x === position.x && pos.y === position.y
+            )
+          ) {
             canPlace = false;
           } else {
             positions.push(position);
@@ -285,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((square) => {
           square.addEventListener("click", () => {
             const position = Position.fromString(square.dataset.position);
-            game.tryToPlaceShip(position);
+            const canPlace = game.tryToPlaceShip(position);
           });
 
           square.addEventListener("mouseover", () => {
