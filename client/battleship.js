@@ -184,9 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   class Board {
     #game;
     #playerBoard;
-    #playerBoardGrid;
     #enemyBoard;
-    #enemyBoardGrid;
     #playerVsPlayerOptionBtn;
     #playerVsAIOptionBtn;
     #horizontalShipPlacementBtn;
@@ -214,8 +212,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#verticalShipPlacementBtn = document.querySelector(
         "#vertital_ship_placement_button"
       );
-      this.#playerBoardGrid = [];
-      this.#enemyBoardGrid = [];
     }
 
     prepareBoardForGame() {
@@ -233,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
-      this.#generateBoard(this.#playerBoard, this.#playerBoardGrid, "player");
+      this.#generateBoard(this.#playerBoard, "player");
       // TODO: Generate later
       // this.#generateBoard(this.#enemyBoard, this.#enemyBoardGrid, "enemy");
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
@@ -250,9 +246,9 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#game.shipDirection = direction;
     }
 
-    #generateBoard = function (board, grid, squareType) {
+    #generateBoard = function (board, squareType) {
       let letterCounter = "A";
-      const squares = []; // TODO: REPLACE WITH GRID VAR?
+      const squares = [];
       for (let row = 0; row < 8; row++) {
         let temp = [];
         for (let column = 0; column < 8; column++) {
@@ -274,9 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           }
           squares.push(square);
-        }
-        if (row !== 0) {
-          grid.push(temp);
         }
       }
       let counter = 0;
