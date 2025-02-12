@@ -146,31 +146,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const positions = [];
       const fleetPositions = this.#player.fleet.fleetPositions;
-      if (this.#shipPlacementDirection == "horizontally") {
-        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-          const position = new Position(x + i, y);
-          if (
-            fleetPositions.some(
-              (pos) => pos.x === position.x && pos.y === position.y
-            )
-          ) {
-            canPlace = false;
-          } else {
-            positions.push(position);
-          }
-        }
-      } else {
-        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-          const position = new Position(x, y + i);
-          if (
-            fleetPositions.some(
-              (pos) => pos.x === position.x && pos.y === position.y
-            )
-          ) {
-            canPlace = false;
-          } else {
-            positions.push(position);
-          }
+      for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+        const position =
+          this.#shipPlacementDirection == "horizontally"
+            ? new Position(x + i, y)
+            : new Position(x, y + i);
+        if (
+          fleetPositions.some(
+            (pos) => pos.x === position.x && pos.y === position.y
+          )
+        ) {
+          canPlace = false;
+        } else {
+          positions.push(position);
         }
       }
       if (canPlace) {
@@ -250,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     #generateBoard = function (board, grid, squareType) {
-      const squares = [];
       this.#prepareGrid(grid, squareType);
       console.log(grid);
       this.#showGrid(board, grid);
