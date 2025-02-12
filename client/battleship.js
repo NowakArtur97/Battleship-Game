@@ -176,8 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (canPlace) {
         this.#player.fleet.nextToLocate.positions = positions;
       }
-      console.log(this.#player.fleet.fleetPositions);
-      console.log(canPlace);
       return canPlace;
     }
   }
@@ -261,17 +259,23 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
+            const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
+            if (
+              game.numberOfSquaresToPlaceNextShip !== squaresToSelect.length
+            ) {
+              return;
+            }
             const position = Position.fromString(square.dataset.position);
             const canPlace = game.tryToPlaceShip(position);
+            if (canPlace) {
+              squaresToSelect.forEach((el) =>
+                el.classList.add(`square--taken`)
+              );
+            }
           });
 
           square.addEventListener("mouseover", () => {
-            const squaresToSelect = boardRef.#selectSqaures(
-              square,
-              grid,
-              game,
-              false
-            );
+            const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             const cssClass =
               squaresToSelect.length === game.numberOfSquaresToPlaceNextShip
                 ? `square--valid`
@@ -283,8 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const squaresToUnselect = boardRef.#selectSqaures(
               square,
               grid,
-              game,
-              false
+              game
             );
             const numberOfSquaresToPlaceNextShip =
               game.numberOfSquaresToPlaceNextShip;
@@ -338,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 25);
     }
 
-    #selectSqaures(square, grid, game, shouldIgnoreTakenSquares) {
+    #selectSqaures(square, grid, game) {
       const numberOfSquaresToPlaceNextShip =
         game.numberOfSquaresToPlaceNextShip;
       const rowOfSquares = grid.find((row) => row.includes(square));
@@ -353,8 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const el = rowOfSquares[squareColumnIndex + i];
           if (
             squareColumnIndex + i < 8 &&
-            (!el.classList.contains(`square--taken`) ||
-              shouldIgnoreTakenSquares)
+            !el.classList.contains(`square--taken`)
           ) {
             squaresToSelect.push(el);
           }
@@ -368,8 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const el = row[squareColumnIndex];
           if (
             squareRowIndex + i < 8 &&
-            (!el.classList.contains(`square--taken`) ||
-              shouldIgnoreTakenSquares)
+            !el.classList.contains(`square--taken`)
           ) {
             squaresToSelect.push(el);
           }

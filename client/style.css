@@ -93,7 +93,7 @@ html {
 }
 
 .square--player {
-  background-color: hsl(120, 100%, 25%);
+  background-color: hsl(250, 100%, 50%);
 }
 
 .square--enemy {
@@ -101,11 +101,15 @@ html {
 }
 
 .square--valid {
-  background-color: hsl(250, 100%, 50%);
+  background-color: hsl(120, 100%, 25%);
 }
 
 .square--invalid {
   background-color: hsl(0, 100%, 50%);
+}
+
+.square--taken {
+  background-color: hsl(120, 100%, 25%);
 }
 
 @media (orientation: landscape) {
