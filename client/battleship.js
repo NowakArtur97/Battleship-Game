@@ -266,7 +266,12 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           square.addEventListener("mouseover", () => {
-            const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
+            const squaresToSelect = boardRef.#selectSqaures(
+              square,
+              grid,
+              game,
+              false
+            );
             const cssClass =
               squaresToSelect.length === game.numberOfSquaresToPlaceNextShip
                 ? `square--valid`
@@ -275,24 +280,18 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           square.addEventListener("mouseleave", () => {
+            const squaresToUnselect = boardRef.#selectSqaures(
+              square,
+              grid,
+              game,
+              false
+            );
             const numberOfSquaresToPlaceNextShip =
               game.numberOfSquaresToPlaceNextShip;
-            const shipDirection = game.shipDirection;
-            let el = square;
-            if (shipDirection === "horizontally") {
-              for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
-                if (el) {
-                  el.classList.remove(...[`square--valid`, `square--invalid`]);
-                }
-                el = el.nextSibling;
-              }
-            } else {
-              const indexOfSquare = squares.indexOf(square);
-              for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
-                if (el) {
-                  el.classList.remove(...[`square--valid`, `square--invalid`]);
-                }
-                el = squares[indexOfSquare + 8 * (i + 1)];
+            for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
+              const el = squaresToUnselect[i];
+              if (el) {
+                el.classList.remove(...[`square--valid`, `square--invalid`]);
               }
             }
           });
@@ -339,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 25);
     }
 
-    #selectSqaures(square, grid, game) {
+    #selectSqaures(square, grid, game, shouldIgnoreTakenSquares) {
       const numberOfSquaresToPlaceNextShip =
         game.numberOfSquaresToPlaceNextShip;
       const rowOfSquares = grid.find((row) => row.includes(square));
@@ -354,17 +353,23 @@ document.addEventListener("DOMContentLoaded", () => {
           const el = rowOfSquares[squareColumnIndex + i];
           if (
             squareColumnIndex + i < 8 &&
-            !el.classList.contains(`square--taken`)
+            (!el.classList.contains(`square--taken`) ||
+              shouldIgnoreTakenSquares)
           ) {
             squaresToSelect.push(el);
           }
         }
       } else {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-          const el = grid[squareRowIndex + i][squareColumnIndex];
+          const row = grid[squareRowIndex + i];
+          if (row === undefined) {
+            return squaresToSelect;
+          }
+          const el = row[squareColumnIndex];
           if (
             squareRowIndex + i < 8 &&
-            !el.classList.contains(`square--taken`)
+            (!el.classList.contains(`square--taken`) ||
+              shouldIgnoreTakenSquares)
           ) {
             squaresToSelect.push(el);
           }
