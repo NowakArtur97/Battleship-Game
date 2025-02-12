@@ -151,19 +151,18 @@ document.addEventListener("DOMContentLoaded", () => {
           this.#shipPlacementDirection == "horizontally"
             ? new Position(x + i, y)
             : new Position(x, y + i);
-        if (
-          fleetPositions.some(
-            (pos) => pos.x === position.x && pos.y === position.y
-          )
-        ) {
-          canPlace = false;
-        } else {
-          positions.push(position);
-        }
+        positions.push(position);
       }
+      canPlace = !positions.some((position) =>
+        fleetPositions.some(
+          (pos) => pos.x === position.x && pos.y === position.y
+        )
+      );
+      console.log(canPlace);
       if (canPlace) {
         this.#player.fleet.nextToLocate.positions = positions;
       }
+      console.log(this.#player.fleet.fleetPositions);
       return canPlace;
     }
   }
