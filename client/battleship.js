@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     #board;
     #gameMode;
-    #shipPlacementDirection = "horizontally";
+    #shipPlacementDirection = "vertically";
     #player;
     #enemy;
 
@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
     set gameMode(gameMode) {
       this.#gameMode = gameMode;
       this.#board.generateBoards();
-      this.#placeShipsOnBoard();
     }
 
     get shipDirection() {
@@ -181,18 +180,14 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log(canPlace);
       return canPlace;
     }
-
-    #populatePositions(x, y) {}
-
-    #placeShipsOnBoard() {
-      // while (this.#player.fleet.areAllShipsPlacedOnBoard) {}
-    }
   }
 
   class Board {
     #game;
     #playerBoard;
+    #playerBoardGrid;
     #enemyBoard;
+    #enemyBoardGrid;
     #playerVsPlayerOptionBtn;
     #playerVsAIOptionBtn;
     #horizontalShipPlacementBtn;
@@ -220,6 +215,8 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#verticalShipPlacementBtn = document.querySelector(
         "#vertital_ship_placement_button"
       );
+      this.#playerBoardGrid = [];
+      this.#enemyBoardGrid = [];
     }
 
     prepareBoardForGame() {
@@ -237,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
-      this.#generateBoard(this.#playerBoard, "player");
+      this.#generateBoard(this.#playerBoard, this.#playerBoardGrid, "player");
       // TODO: Generate later
       // this.#generateBoard(this.#enemyBoard, this.#enemyBoardGrid, "enemy");
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
@@ -254,75 +251,24 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#game.shipDirection = direction;
     }
 
-    #generateBoard = function (board, squareType) {
-      let letterCounter = "A";
+    #generateBoard = function (board, grid, squareType) {
       const squares = [];
-      for (let row = 0; row < 8; row++) {
-        let temp = [];
-        for (let column = 0; column < 8; column++) {
-          const square = document.createElement("div");
-          square.classList.add(...["square", `square--${squareType}`]);
-          if (row !== 0 && column !== 0) {
-            const position = new Position(column, row);
-            square.dataset.position = position.asString;
-            temp[column] = square;
-          }
-          const isInFirstRow = row === 0 && column !== 0;
-          if (isInFirstRow) {
-            square.textContent = column;
-          }
-          const isInFirstColumn = column === 0 && row !== 0;
-          if (isInFirstColumn) {
-            square.textContent = String.fromCharCode(
-              letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
-            );
-          }
-          squares.push(square);
-        }
-      }
-      let counter = 0;
-      let interval = setInterval(() => {
-        board.appendChild(squares[counter++]);
-        if (counter >= squares.length) {
-          clearInterval(interval);
-        }
-      }, 25);
+      this.#prepareGrid(grid, squareType);
+      console.log(grid);
+      this.#showGrid(board, grid);
       const game = this.#game;
-      squares
-        .filter((square) => square.textContent === "")
-        .forEach((square) => {
+      const boardRef = this;
+      grid.forEach((row) => {
+        row.forEach((square) => {
           square.addEventListener("click", () => {
             const position = Position.fromString(square.dataset.position);
             const canPlace = game.tryToPlaceShip(position);
           });
 
           square.addEventListener("mouseover", () => {
-            const numberOfSquaresToPlaceNextShip =
-              game.numberOfSquaresToPlaceNextShip;
-            const shipDirection = game.shipDirection;
-            let el = square;
-            const squaresToSelect = [];
-            if (shipDirection === "horizontally") {
-              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-                if (el && el.textContent === "") {
-                  squaresToSelect.push(el);
-                }
-                if (el.textContent !== "") {
-                  i = numberOfSquaresToPlaceNextShip;
-                }
-                el = el.nextSibling;
-              }
-            } else {
-              const indexOfSquare = squares.indexOf(square);
-              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-                if (el && el.textContent === "") {
-                  squaresToSelect.push(el);
-                }
-                el = squares[indexOfSquare + 8 * (i + 1)];
-              }
-            }
+            const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             const cssClass =
-              squaresToSelect.length === numberOfSquaresToPlaceNextShip
+              squaresToSelect.length === game.numberOfSquaresToPlaceNextShip
                 ? `square--valid`
                 : `square--invalid`;
             squaresToSelect.forEach((el) => el.classList.add(cssClass));
@@ -334,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const shipDirection = game.shipDirection;
             let el = square;
             if (shipDirection === "horizontally") {
-              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+              for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
                 if (el) {
                   el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
@@ -342,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             } else {
               const indexOfSquare = squares.indexOf(square);
-              for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+              for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
                 if (el) {
                   el.classList.remove(...[`square--valid`, `square--invalid`]);
                 }
@@ -351,7 +297,81 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
         });
+      });
     };
+
+    #prepareGrid(grid, squareType) {
+      let letterCounter = "A";
+      for (let row = 0; row < 8; row++) {
+        let rowOfSquares = [];
+        for (let column = 0; column < 8; column++) {
+          const square = document.createElement("div");
+          square.classList.add(...["square", `square--${squareType}`]);
+          const isInNotInFirstRowAndColumn = row !== 0 && column !== 0;
+          if (isInNotInFirstRowAndColumn) {
+            const position = new Position(column, row);
+            square.dataset.position = position.asString;
+          }
+          const isInFirstRow = row === 0 && column !== 0;
+          if (isInFirstRow) {
+            square.textContent = column;
+          }
+          const isInFirstColumn = column === 0 && row !== 0;
+          if (isInFirstColumn) {
+            square.textContent = String.fromCharCode(
+              letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
+            );
+          }
+          rowOfSquares[column] = square;
+        }
+        grid.push(rowOfSquares);
+      }
+    }
+
+    #showGrid(board, grid) {
+      let counter = 0;
+      const squares = grid.flat(1);
+      let interval = setInterval(() => {
+        board.appendChild(squares[counter++]);
+        if (counter >= squares.length) {
+          clearInterval(interval);
+        }
+      }, 25);
+    }
+
+    #selectSqaures(square, grid, game) {
+      const numberOfSquaresToPlaceNextShip =
+        game.numberOfSquaresToPlaceNextShip;
+      const rowOfSquares = grid.find((row) => row.includes(square));
+      const squareColumnIndex = rowOfSquares.indexOf(square);
+      const squareRowIndex = grid.indexOf(rowOfSquares);
+      const squaresToSelect = [];
+      if (squareColumnIndex === 0 || squareRowIndex === 0) {
+        return [];
+      }
+      if (game.shipDirection === "horizontally") {
+        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+          const el = rowOfSquares[squareColumnIndex + i];
+          if (
+            squareColumnIndex + i < 8 &&
+            !el.classList.contains(`square--taken`)
+          ) {
+            squaresToSelect.push(el);
+          }
+        }
+      } else {
+        for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+          const el = grid[squareRowIndex + i][squareColumnIndex];
+          if (
+            squareRowIndex + i < 8 &&
+            !el.classList.contains(`square--taken`)
+          ) {
+            squaresToSelect.push(el);
+          }
+        }
+      }
+      return squaresToSelect;
+    }
 
     #toggleOnOffElement(element) {
       const { style } = element;
