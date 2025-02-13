@@ -170,6 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
         player.fleet.nextToLocate.positions = positions;
       }
       console.log(player.fleet.fleetPositions);
+      if (player.fleet.areAllShipsPlacedOnBoard) {
+        this.#board.showEnemyBoard();
+      }
       return canPlace;
     }
   }
@@ -226,6 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
+      this.#generateBoard(
+        this.#playerBoard,
+        this.#playerBoardGrid,
+        Game.PLAYER_TYPE.PLAYER
+      );
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#horizontalShipPlacementBtn.addEventListener("click", () =>
         this.setShipDirection("horizontally")
@@ -381,6 +389,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       return squaresToSelect;
+    }
+
+    showEnemyBoard() {
+      this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
+      this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
+      this.#enemyBoard.style.display = "grid";
+      this.#generateBoard(
+        this.#enemyBoard,
+        this.#enemyBoardGrid,
+        Game.PLAYER_TYPE.ENEMY
+      );
     }
 
     #toggleOnOffElement(element) {
