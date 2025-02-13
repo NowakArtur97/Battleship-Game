@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Math.random() > 0.5
           ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
           : Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
-      const generateRandomPosition = () => Math.floor(Math.random() * 8);
+      const generateRandomPosition = () => Math.floor(Math.random() * 7 + 1);
       const x = generateRandomPosition();
       const y = generateRandomPosition();
       const position = new Position(x, y);
