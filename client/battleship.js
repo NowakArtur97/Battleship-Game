@@ -175,13 +175,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       console.log(player.fleet.fleetPositions);
       if (player.fleet.areAllShipsPlacedOnBoard) {
-        this.#board.showEnemyBoard();
         this.#placeAIEnemyShips();
       }
       return canPlace;
     }
 
     #placeAIEnemyShips() {
+      if (this.#enemy.fleet.areAllShipsPlacedOnBoard) {
+        this.#board.showEnemyBoard();
+        return;
+      }
       const shipPlacementDirection =
         Math.random() > 0.5
           ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
@@ -190,12 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const x = generateRandomPosition();
       const y = generateRandomPosition();
       const position = new Position(x, y);
-      const canPlace = game.tryToPlaceShip(
-        position,
-        shipPlacementDirection,
-        this.#enemy
-      );
-      console.table(x, y, canPlace);
+      game.tryToPlaceShip(position, shipPlacementDirection, this.#enemy);
       if (!this.#enemy.fleet.areAllShipsPlacedOnBoard) {
         this.#placeAIEnemyShips();
       }
