@@ -105,9 +105,13 @@ document.addEventListener("DOMContentLoaded", () => {
       PLAYER: Symbol("player"),
       ENEMY: Symbol("enemy"),
     });
+    static SHIP_PLACEMENT_DIRECTION = Object.freeze({
+      HORIZONTALLY: Symbol("horizontally"),
+      VERTICALLY: Symbol("vertically"),
+    });
     #board;
     #gameMode;
-    #shipPlacementDirection = "vertically";
+    #shipPlacementDirection = Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
     #player;
     #enemy;
 
@@ -127,12 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#board.generateBoards();
     }
 
-    get shipDirection() {
+    get shipPlacementDirection() {
       return this.#shipPlacementDirection;
     }
 
-    set shipDirection(direction) {
-      this.#shipPlacementDirection = direction;
+    set shipPlacementDirection(shipPlacementDirection) {
+      this.#shipPlacementDirection = shipPlacementDirection;
     }
 
     get numberOfSquaresToPlaceNextShip() {
@@ -140,12 +144,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return nextToLocate !== undefined ? nextToLocate.length : 0;
     }
 
-    tryToPlaceShip(startingPosition, player) {
-      const numberOfSquaresToPlaceNextShip = this
-        .numberOfSquaresToPlaceNextShip;
+    tryToPlaceShip(startingPosition, shipPlacementDirection, player) {
+      const nextToLocate = player.fleet.nextToLocate;
+      const numberOfSquaresToPlaceNextShip =
+        nextToLocate !== undefined ? nextToLocate.length : 0;
       const { x, y } = startingPosition;
       let canPlace =
-        this.#shipPlacementDirection == "horizontally"
+        shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
           ? x + numberOfSquaresToPlaceNextShip <= 8
           : y + numberOfSquaresToPlaceNextShip <= 8;
       if (!canPlace) {
@@ -155,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fleetPositions = player.fleet.fleetPositions;
       for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
         const position =
-          this.#shipPlacementDirection == "horizontally"
+          shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
             ? new Position(x + i, y)
             : new Position(x, y + i);
         positions.push(position);
@@ -165,15 +170,35 @@ document.addEventListener("DOMContentLoaded", () => {
           (pos) => pos.x === position.x && pos.y === position.y
         )
       );
-      console.log(canPlace);
       if (canPlace) {
         player.fleet.nextToLocate.positions = positions;
       }
       console.log(player.fleet.fleetPositions);
       if (player.fleet.areAllShipsPlacedOnBoard) {
         this.#board.showEnemyBoard();
+        this.#placeAIEnemyShips();
       }
       return canPlace;
+    }
+
+    #placeAIEnemyShips() {
+      const shipPlacementDirection =
+        Math.random() > 0.5
+          ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
+          : Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
+      const generateRandomPosition = () => Math.floor(Math.random() * 8);
+      const x = generateRandomPosition();
+      const y = generateRandomPosition();
+      const position = new Position(x, y);
+      const canPlace = game.tryToPlaceShip(
+        position,
+        shipPlacementDirection,
+        this.#enemy
+      );
+      console.table(x, y, canPlace);
+      if (!this.#enemy.fleet.areAllShipsPlacedOnBoard) {
+        this.#placeAIEnemyShips();
+      }
     }
   }
 
@@ -235,17 +260,19 @@ document.addEventListener("DOMContentLoaded", () => {
         Game.PLAYER_TYPE.PLAYER
       );
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
-      this.#horizontalShipPlacementBtn.addEventListener("click", () =>
-        this.setShipDirection("horizontally")
+      this.#horizontalShipPlacementBtn.addEventListener(
+        "click",
+        () =>
+          (this.#game.shipPlacementDirection =
+            Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY)
       );
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
-      this.#verticalShipPlacementBtn.addEventListener("click", () =>
-        this.setShipDirection("vertically")
+      this.#verticalShipPlacementBtn.addEventListener(
+        "click",
+        () =>
+          (this.#game.shipPlacementDirection =
+            Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY)
       );
-    }
-
-    setShipDirection(direction) {
-      this.#game.shipDirection = direction;
     }
 
     #generateBoard = function (board, grid, squareType) {
@@ -270,7 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            const canPlace = game.tryToPlaceShip(position, game.player);
+            const canPlace = game.tryToPlaceShip(
+              position,
+              game.shipPlacementDirection,
+              game.player
+            );
             if (canPlace) {
               squaresToSelect.forEach((el) =>
                 el.classList.add(`square--taken`)
@@ -363,7 +394,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (squareColumnIndex === 0 || squareRowIndex === 0) {
         return [];
       }
-      if (game.shipDirection === "horizontally") {
+      if (
+        game.shipPlacementDirection ===
+        Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
+      ) {
         for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
           const el = rowOfSquares[squareColumnIndex + i];
           if (
