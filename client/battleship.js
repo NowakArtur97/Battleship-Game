@@ -101,6 +101,10 @@ document.addEventListener("DOMContentLoaded", () => {
       PLAYER_VS_PLAYER: Symbol("playerVsPlayer"),
       PLAYER_VS_AI: Symbol("playerVsAI"),
     });
+    static PLAYER_TYPE = Object.freeze({
+      PLAYER: Symbol("player"),
+      ENEMY: Symbol("enemy"),
+    });
     #board;
     #gameMode;
     #shipPlacementDirection = "vertically";
@@ -114,6 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#board.prepareBoardForGame();
     }
 
+    get player() {
+      return this.#player;
+    }
+
     set gameMode(gameMode) {
       this.#gameMode = gameMode;
       this.#board.generateBoards();
@@ -125,7 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set shipDirection(direction) {
       this.#shipPlacementDirection = direction;
-      console.log(direction);
     }
 
     get numberOfSquaresToPlaceNextShip() {
@@ -133,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return nextToLocate !== undefined ? nextToLocate.length : 0;
     }
 
-    tryToPlaceShip(startingPosition) {
+    tryToPlaceShip(startingPosition, player) {
       const numberOfSquaresToPlaceNextShip = this
         .numberOfSquaresToPlaceNextShip;
       const { x, y } = startingPosition;
@@ -145,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return false;
       }
       const positions = [];
-      const fleetPositions = this.#player.fleet.fleetPositions;
+      const fleetPositions = player.fleet.fleetPositions;
       for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
         const position =
           this.#shipPlacementDirection == "horizontally"
@@ -160,9 +167,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       console.log(canPlace);
       if (canPlace) {
-        this.#player.fleet.nextToLocate.positions = positions;
+        player.fleet.nextToLocate.positions = positions;
       }
-      console.log(this.#player.fleet.fleetPositions);
+      console.log(player.fleet.fleetPositions);
       return canPlace;
     }
   }
@@ -219,9 +226,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
-      this.#generateBoard(this.#playerBoard, this.#playerBoardGrid, "player");
-      // TODO: Generate later
-      // this.#generateBoard(this.#enemyBoard, this.#enemyBoardGrid, "enemy");
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#horizontalShipPlacementBtn.addEventListener("click", () =>
         this.setShipDirection("horizontally")
@@ -238,13 +242,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #generateBoard = function (board, grid, squareType) {
       this.#prepareGrid(grid, squareType);
-      console.log(grid);
       this.#showGrid(board, grid);
+      if (squareType === Game.PLAYER_TYPE.ENEMY) {
+        return;
+      }
       const game = this.#game;
       const boardRef = this;
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
+            // TODO: Remove event listeners after placing all ships?
+            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+              return;
+            }
             const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             if (
               game.numberOfSquaresToPlaceNextShip !== squaresToSelect.length
@@ -252,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            const canPlace = game.tryToPlaceShip(position);
+            const canPlace = game.tryToPlaceShip(position, game.player);
             if (canPlace) {
               squaresToSelect.forEach((el) =>
                 el.classList.add(`square--taken`)
@@ -261,6 +271,9 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           square.addEventListener("mouseover", () => {
+            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+              return;
+            }
             const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             const cssClass =
               squaresToSelect.length === game.numberOfSquaresToPlaceNextShip
@@ -270,6 +283,9 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           square.addEventListener("mouseleave", () => {
+            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+              return;
+            }
             const squaresToUnselect = boardRef.#selectSqaures(
               square,
               grid,
@@ -294,7 +310,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let rowOfSquares = [];
         for (let column = 0; column < 8; column++) {
           const square = document.createElement("div");
-          square.classList.add(...["square", `square--${squareType}`]);
+          square.classList.add(
+            ...["square", `square--${squareType.description}`]
+          );
           const isInNotInFirstRowAndColumn = row !== 0 && column !== 0;
           if (isInNotInFirstRowAndColumn) {
             const position = new Position(column, row);
