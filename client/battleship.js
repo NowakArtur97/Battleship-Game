@@ -124,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
     isSunk(ship, position) {
       return ship.isSunk(position);
     }
+
+    takeTurn() {}
   }
 
   class Game {
@@ -223,13 +225,30 @@ document.addEventListener("DOMContentLoaded", () => {
         Math.random() > 0.5
           ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
           : Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
-      const generateRandomPosition = () => Math.floor(Math.random() * 7 + 1);
-      const x = generateRandomPosition();
-      const y = generateRandomPosition();
+      const x = this.#generateRandomPosition();
+      const y = this.#generateRandomPosition();
       const position = new Position(x, y);
       game.tryToPlaceShip(position, shipPlacementDirection, this.#enemy);
       if (!this.#enemy.fleet.areAllShipsPlacedOnBoard) {
         this.#placeAIEnemyShips();
+      }
+    }
+
+    #generateRandomPosition() {
+      return Math.floor(Math.random() * 7 + 1);
+    }
+
+    takeTurnByEnemy() {
+      const x = this.#generateRandomPosition();
+      const y = this.#generateRandomPosition();
+      const position = new Position(x, y);
+      const ship = this.#player.findHitShip(position);
+      console.table(x, y);
+      if (ship) {
+        this.#board.changePlayerSquareClass(position, true);
+        this.takeTurnByEnemy();
+      } else {
+        this.#board.changePlayerSquareClass(position, false);
       }
     }
   }
@@ -395,10 +414,20 @@ document.addEventListener("DOMContentLoaded", () => {
               square.classList.add(`square--enemy-hit`);
             } else {
               square.classList.add(`square--enemy-miss`);
+              game.takeTurnByEnemy();
             }
           });
         });
       });
+    }
+
+    changePlayerSquareClass(position, isHit) {
+      const square = this.#playerBoardGrid
+        .flat(1)
+        .find((el) => el.dataset.position === position.asString);
+      square.classList.add(
+        isHit ? `square--player-hit` : `square--player-miss`
+      );
     }
 
     #prepareGrid(grid, squareType) {

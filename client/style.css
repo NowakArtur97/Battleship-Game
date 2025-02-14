@@ -112,6 +112,13 @@ html {
   background-color: hsl(120, 100%, 25%);
 }
 
+.square--player-hit {
+  background-color: hsl(0, 100%, 50%);
+}
+
+.square--player-miss {
+  background-color: hsl(46, 100%, 50%);
+}
 .square--enemy-hit {
   background-color: hsl(120, 100%, 25%);
 }
