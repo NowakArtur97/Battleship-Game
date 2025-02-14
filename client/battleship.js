@@ -34,11 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     #name;
     #length;
     #positions;
+    #hitPositions;
 
     constructor(name, length) {
       this.#name = name;
       this.#length = length;
       this.#positions = [];
+      this.#hitPositions = [];
     }
 
     get name() {
@@ -55,6 +57,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set positions(positions) {
       this.#positions = positions;
+    }
+
+    isHit(position) {
+      return this.#positions.some(
+        (pos) => pos.x === position.x && pos.y === position.y
+      );
+    }
+
+    // TODO: Use or remove
+    isSunk() {
+      return this.#positions.length === this.#hitPositions.length;
+    }
+
+    set hitPosition(position) {
+      this.#hitPositions.push(position);
     }
   }
 
@@ -82,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
     get fleetPositions() {
       return this.#ships.map((ship) => ship.positions).flat(1);
     }
+
+    findHitShip(position) {
+      return this.#ships.find((ship) => ship.isHit(position));
+    }
   }
 
   class Player {
@@ -93,6 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get fleet() {
       return this.#fleet;
+    }
+
+    findHitShip(position) {
+      return this.#fleet.findHitShip(position);
+    }
+
+    // TODO: Use or remove
+    isSunk(ship, position) {
+      return ship.isSunk(position);
     }
   }
 
@@ -124,6 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get player() {
       return this.#player;
+    }
+
+    get enemy() {
+      return this.#enemy;
     }
 
     set gameMode(gameMode) {
@@ -273,12 +307,17 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    #generateBoard = function (board, grid, squareType) {
+    #generateBoard(board, grid, squareType) {
       this.#prepareGrid(grid, squareType);
       this.#showGrid(board, grid);
       if (squareType === Game.PLAYER_TYPE.ENEMY) {
-        return;
+        this.#setupEnemyBoardEventListeners(grid);
+      } else {
+        this.#setupPlayerBoardEventListeners(grid);
       }
+    }
+
+    #setupPlayerBoardEventListeners(grid) {
       const game = this.#game;
       const boardRef = this;
       grid.forEach((row) => {
@@ -339,7 +378,28 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       });
-    };
+    }
+
+    #setupEnemyBoardEventListeners(grid) {
+      const game = this.#game;
+      grid.forEach((row) => {
+        row.forEach((square) => {
+          square.addEventListener("click", () => {
+            if (square.classList.contains(...[`square--hit`, `square--miss`])) {
+              return;
+            }
+            const position = Position.fromString(square.dataset.position);
+            const ship = game.enemy.findHitShip(position);
+            if (ship) {
+              ship.hitPosition = position;
+              square.classList.add(`square--enemy-hit`);
+            } else {
+              square.classList.add(`square--enemy-miss`);
+            }
+          });
+        });
+      });
+    }
 
     #prepareGrid(grid, squareType) {
       let letterCounter = "A";

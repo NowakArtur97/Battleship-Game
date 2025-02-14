@@ -112,6 +112,14 @@ html {
   background-color: hsl(120, 100%, 25%);
 }
 
+.square--enemy-hit {
+  background-color: hsl(120, 100%, 25%);
+}
+
+.square--enemy-miss {
+  background-color: hsl(250, 100%, 50%);
+}
+
 @media (orientation: landscape) {
   .boards {
     flex-wrap: nowrap;
