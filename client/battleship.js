@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return this.#ships.map((ship) => ship.positions).flat(1);
     }
 
-    findHitShip(position) {
+    findShipOnPosition(position) {
       return this.#ships.find((ship) => ship.isHit(position));
     }
   }
@@ -116,8 +116,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return this.#fleet;
     }
 
-    findHitShip(position) {
-      return this.#fleet.findHitShip(position);
+    get areAllShipsPlacedOnBoard() {
+      return this.#fleet.areAllShipsPlacedOnBoard;
+    }
+
+    get numberOfSquaresToPlaceNextShip() {
+      const nextToLocate = this.#fleet.nextToLocate;
+      return nextToLocate !== undefined ? nextToLocate.length : 0;
+    }
+
+    findShipOnPosition(position) {
+      return this.#fleet.findShipOnPosition(position);
     }
 
     // TODO: Use or remove
@@ -125,7 +134,69 @@ document.addEventListener("DOMContentLoaded", () => {
       return ship.isSunk(position);
     }
 
-    takeTurn() {}
+    tryToPlaceShip(startingPosition, shipPlacementDirection) {
+      const nextToLocate = this.#fleet.nextToLocate;
+      const numberOfSquaresToPlaceNextShip =
+        nextToLocate !== undefined ? nextToLocate.length : 0;
+      const { x, y } = startingPosition;
+      let canPlace =
+        shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
+          ? x + numberOfSquaresToPlaceNextShip <= 8
+          : y + numberOfSquaresToPlaceNextShip <= 8;
+      if (!canPlace) {
+        return false;
+      }
+      const positions = [];
+      const fleetPositions = this.#fleet.fleetPositions;
+      for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
+        const position =
+          shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
+            ? new Position(x + i, y)
+            : new Position(x, y + i);
+        positions.push(position);
+      }
+      canPlace = !positions.some((position) =>
+        fleetPositions.some(
+          (pos) => pos.x === position.x && pos.y === position.y
+        )
+      );
+      if (canPlace) {
+        this.#fleet.nextToLocate.positions = positions;
+      }
+      console.log(this.#fleet.fleetPositions);
+      return canPlace;
+    }
+  }
+
+  class AIPlayer extends Player {
+    placeShips() {
+      while (!this.areAllShipsPlacedOnBoard) {
+        const shipPlacementDirection =
+          Math.random() > 0.5
+            ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
+            : Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
+        const x = this.#generateRandomPosition();
+        const y = this.#generateRandomPosition();
+        const position = new Position(x, y);
+        this.tryToPlaceShip(position, shipPlacementDirection);
+        if (!this.areAllShipsPlacedOnBoard) {
+          this.placeShips();
+        }
+      }
+    }
+
+    takeTurn() {
+      const x = this.#generateRandomPosition();
+      const y = this.#generateRandomPosition();
+      const position = new Position(x, y);
+      const ship = this.findShipOnPosition(position);
+      console.table(x, y);
+      return ship;
+    }
+
+    #generateRandomPosition() {
+      return Math.floor(Math.random() * 7 + 1);
+    }
   }
 
   class Game {
@@ -150,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     constructor(board) {
       this.#board = board;
       this.#player = new Player();
-      this.#enemy = new Player();
+      this.#enemy = new AIPlayer();
       this.#board.prepareBoardForGame();
     }
 
@@ -173,83 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set shipPlacementDirection(shipPlacementDirection) {
       this.#shipPlacementDirection = shipPlacementDirection;
-    }
-
-    get numberOfSquaresToPlaceNextShip() {
-      const nextToLocate = this.#player.fleet.nextToLocate;
-      return nextToLocate !== undefined ? nextToLocate.length : 0;
-    }
-
-    tryToPlaceShip(startingPosition, shipPlacementDirection, player) {
-      const nextToLocate = player.fleet.nextToLocate;
-      const numberOfSquaresToPlaceNextShip =
-        nextToLocate !== undefined ? nextToLocate.length : 0;
-      const { x, y } = startingPosition;
-      let canPlace =
-        shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
-          ? x + numberOfSquaresToPlaceNextShip <= 8
-          : y + numberOfSquaresToPlaceNextShip <= 8;
-      if (!canPlace) {
-        return false;
-      }
-      const positions = [];
-      const fleetPositions = player.fleet.fleetPositions;
-      for (let i = 0; i < numberOfSquaresToPlaceNextShip; i++) {
-        const position =
-          shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
-            ? new Position(x + i, y)
-            : new Position(x, y + i);
-        positions.push(position);
-      }
-      canPlace = !positions.some((position) =>
-        fleetPositions.some(
-          (pos) => pos.x === position.x && pos.y === position.y
-        )
-      );
-      if (canPlace) {
-        player.fleet.nextToLocate.positions = positions;
-      }
-      console.log(player.fleet.fleetPositions);
-      if (player.fleet.areAllShipsPlacedOnBoard) {
-        this.#placeAIEnemyShips();
-      }
-      return canPlace;
-    }
-
-    #placeAIEnemyShips() {
-      if (this.#enemy.fleet.areAllShipsPlacedOnBoard) {
-        this.#board.showEnemyBoard();
-        return;
-      }
-      const shipPlacementDirection =
-        Math.random() > 0.5
-          ? Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
-          : Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
-      const x = this.#generateRandomPosition();
-      const y = this.#generateRandomPosition();
-      const position = new Position(x, y);
-      game.tryToPlaceShip(position, shipPlacementDirection, this.#enemy);
-      if (!this.#enemy.fleet.areAllShipsPlacedOnBoard) {
-        this.#placeAIEnemyShips();
-      }
-    }
-
-    #generateRandomPosition() {
-      return Math.floor(Math.random() * 7 + 1);
-    }
-
-    takeTurnByEnemy() {
-      const x = this.#generateRandomPosition();
-      const y = this.#generateRandomPosition();
-      const position = new Position(x, y);
-      const ship = this.#player.findHitShip(position);
-      console.table(x, y);
-      if (ship) {
-        this.#board.changePlayerSquareClass(position, true);
-        this.takeTurnByEnemy();
-      } else {
-        this.#board.changePlayerSquareClass(position, false);
-      }
     }
   }
 
@@ -343,42 +337,47 @@ document.addEventListener("DOMContentLoaded", () => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
             // TODO: Remove event listeners after placing all ships?
-            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+            if (game.player.areAllShipsPlacedOnBoard) {
               return;
             }
             const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             if (
-              game.numberOfSquaresToPlaceNextShip !== squaresToSelect.length
+              game.player.numberOfSquaresToPlaceNextShip !==
+              squaresToSelect.length
             ) {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            const canPlace = game.tryToPlaceShip(
+            const canPlace = game.player.tryToPlaceShip(
               position,
-              game.shipPlacementDirection,
-              game.player
+              game.shipPlacementDirection
             );
             if (canPlace) {
               squaresToSelect.forEach((el) =>
                 el.classList.add(`square--taken`)
               );
             }
+            if (game.player.areAllShipsPlacedOnBoard) {
+              game.enemy.placeShips();
+              boardRef.showEnemyBoard();
+            }
           });
 
           square.addEventListener("mouseover", () => {
-            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+            if (game.player.areAllShipsPlacedOnBoard) {
               return;
             }
             const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             const cssClass =
-              squaresToSelect.length === game.numberOfSquaresToPlaceNextShip
+              squaresToSelect.length ===
+              game.player.numberOfSquaresToPlaceNextShip
                 ? `square--valid`
                 : `square--invalid`;
             squaresToSelect.forEach((el) => el.classList.add(cssClass));
           });
 
           square.addEventListener("mouseleave", () => {
-            if (game.player.fleet.areAllShipsPlacedOnBoard) {
+            if (game.player.areAllShipsPlacedOnBoard) {
               return;
             }
             const squaresToUnselect = boardRef.#selectSqaures(
@@ -387,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
               game
             );
             const numberOfSquaresToPlaceNextShip =
-              game.numberOfSquaresToPlaceNextShip;
+              game.player.numberOfSquaresToPlaceNextShip;
             for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
               const el = squaresToUnselect[i];
               if (el) {
@@ -401,6 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #setupEnemyBoardEventListeners(grid) {
       const game = this.#game;
+      const boardRef = this;
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
@@ -408,13 +408,19 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            const ship = game.enemy.findHitShip(position);
+            const ship = game.enemy.findShipOnPosition(position);
             if (ship) {
               ship.hitPosition = position;
               square.classList.add(`square--enemy-hit`);
             } else {
               square.classList.add(`square--enemy-miss`);
-              game.takeTurnByEnemy();
+              const ship = game.enemy.takeTurn();
+              if (ship) {
+                boardRef.changePlayerSquareClass(position, true);
+                game.enemy.takeTurn();
+              } else {
+                boardRef.changePlayerSquareClass(position, false);
+              }
             }
           });
         });
@@ -473,7 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #selectSqaures(square, grid, game) {
       const numberOfSquaresToPlaceNextShip =
-        game.numberOfSquaresToPlaceNextShip;
+        game.player.numberOfSquaresToPlaceNextShip;
       const rowOfSquares = grid.find((row) => row.includes(square));
       const squareColumnIndex = rowOfSquares.indexOf(square);
       const squareRowIndex = grid.indexOf(rowOfSquares);
