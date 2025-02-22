@@ -181,6 +181,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   class AIPlayer extends Player {
+    #hits;
+
+    constructor() {
+      super();
+      this.#hits = [];
+    }
+
     placeShips() {
       while (!this.areAllShipsPlacedOnBoard) {
         const shipPlacementDirection =
@@ -200,7 +207,13 @@ document.addEventListener("DOMContentLoaded", () => {
     getHitPosition() {
       const x = this.#generateRandomPosition();
       const y = this.#generateRandomPosition();
-      return new Position(x, y);
+      const position = new Position(x, y);
+      if (
+        this.#hits.some((pos) => pos.x === position.x && pos.y === position.y)
+      ) {
+        this.getHitPosition();
+      }
+      return position;
     }
 
     #generateRandomPosition() {
