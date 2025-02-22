@@ -59,19 +59,22 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#positions = positions;
     }
 
+    get hitPositions() {
+      return this.#hitPositions;
+    }
+
+    set hitPosition(position) {
+      this.#hitPositions.push(position);
+    }
+
     isHit(position) {
       return this.#positions.some(
         (pos) => pos.x === position.x && pos.y === position.y
       );
     }
 
-    // TODO: Use or remove
     isSunk() {
       return this.#positions.length === this.#hitPositions.length;
-    }
-
-    set hitPosition(position) {
-      this.#hitPositions.push(position);
     }
   }
 
@@ -98,6 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get fleetPositions() {
       return this.#ships.map((ship) => ship.positions).flat(1);
+    }
+
+    get isFleetSunk() {
+      return this.#ships.every(
+        (ship) => ship.positions.length === ship.hitPositions.length
+      );
     }
 
     findShipOnPosition(position) {
@@ -129,13 +138,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return this.#fleet.nextToPlace;
     }
 
-    findShipOnPosition(position) {
-      return this.#fleet.findShipOnPosition(position);
+    get isFleetSunk() {
+      return this.#fleet.isFleetSunk;
     }
 
-    // TODO: Use or remove
-    isSunk(ship, position) {
-      return ship.isSunk(position);
+    findShipOnPosition(position) {
+      return this.#fleet.findShipOnPosition(position);
     }
 
     tryToPlaceShip(startingPosition, shipPlacementDirection) {
@@ -262,6 +270,8 @@ document.addEventListener("DOMContentLoaded", () => {
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
     #shipToPlaceName;
+    #resultMessageContainer;
+    #resultMessage;
 
     constructor() {
       this.#playerBoard = document.querySelector(".board--player .squares");
@@ -286,6 +296,10 @@ document.addEventListener("DOMContentLoaded", () => {
         "#vertital_ship_placement_button"
       );
       this.#shipToPlaceName = document.querySelector(".board__ship_name");
+      this.#resultMessageContainer = document.querySelector(
+        ".result_message__container"
+      );
+      this.#resultMessage = document.querySelector(".result_message");
       this.#playerBoardGrid = [];
       this.#enemyBoardGrid = [];
     }
@@ -296,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#toggleOnOffElement(this.#shipToPlaceName);
+      this.#toggleOnOffElement(this.#resultMessageContainer);
     }
 
     #startGameMode(chosenGameMode) {
@@ -424,12 +439,21 @@ document.addEventListener("DOMContentLoaded", () => {
             if (ship) {
               ship.hitPosition = position;
               square.classList.add(`square--enemy-hit`);
+              if (game.enemy.isFleetSunk) {
+                this.#resultMessageContainer.style.display = "flex";
+                this.#resultMessage.textContent = "You won";
+              }
             } else {
               square.classList.add(`square--enemy-miss`);
               const ship = game.enemy.takeTurn();
               if (ship) {
                 boardRef.changePlayerSquareClass(position, true);
-                game.enemy.takeTurn();
+                if (game.player.isFleetSunk) {
+                  this.#resultMessageContainer.style.display = "flex";
+                  this.#resultMessage.textContent = "You lose";
+                } else {
+                  game.enemy.takeTurn();
+                }
               } else {
                 boardRef.changePlayerSquareClass(position, false);
               }
