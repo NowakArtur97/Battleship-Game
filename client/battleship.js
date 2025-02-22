@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ];
     }
 
-    get nextToLocate() {
+    get nextToPlace() {
       return this.#ships.find((ship) => ship.positions.length === 0);
     }
 
@@ -121,8 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     get numberOfSquaresToPlaceNextShip() {
-      const nextToLocate = this.#fleet.nextToLocate;
-      return nextToLocate !== undefined ? nextToLocate.length : 0;
+      const nextToPlace = this.#fleet.nextToPlace;
+      return nextToPlace !== undefined ? nextToPlace.length : 0;
+    }
+
+    get nextToPlace() {
+      return this.#fleet.nextToPlace;
     }
 
     findShipOnPosition(position) {
@@ -135,9 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tryToPlaceShip(startingPosition, shipPlacementDirection) {
-      const nextToLocate = this.#fleet.nextToLocate;
+      const nextToPlace = this.#fleet.nextToPlace;
       const numberOfSquaresToPlaceNextShip =
-        nextToLocate !== undefined ? nextToLocate.length : 0;
+        nextToPlace !== undefined ? nextToPlace.length : 0;
       const { x, y } = startingPosition;
       let canPlace =
         shipPlacementDirection == Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY
@@ -161,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         )
       );
       if (canPlace) {
-        this.#fleet.nextToLocate.positions = positions;
+        this.#fleet.nextToPlace.positions = positions;
       }
       console.log(this.#fleet.fleetPositions);
       return canPlace;
@@ -235,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set gameMode(gameMode) {
       this.#gameMode = gameMode;
-      this.#board.generateBoards();
+      this.#board.generatePlayerBoard();
     }
 
     get shipPlacementDirection() {
@@ -257,6 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     #playerVsAIOptionBtn;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
+    #shipToPlaceName;
 
     constructor() {
       this.#playerBoard = document.querySelector(".board--player .squares");
@@ -280,6 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#verticalShipPlacementBtn = document.querySelector(
         "#vertital_ship_placement_button"
       );
+      this.#shipToPlaceName = document.querySelector(".board__ship_name");
       this.#playerBoardGrid = [];
       this.#enemyBoardGrid = [];
     }
@@ -289,13 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#enemyBoard);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
+      this.#toggleOnOffElement(this.#shipToPlaceName);
     }
 
     #startGameMode(chosenGameMode) {
       this.#game.gameMode = chosenGameMode;
     }
 
-    generateBoards() {
+    generatePlayerBoard() {
       this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
       this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
@@ -318,6 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
           (this.#game.shipPlacementDirection =
             Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY)
       );
+      this.#toggleOnOffElement(this.#shipToPlaceName);
     }
 
     #generateBoard(board, grid, squareType) {
@@ -333,6 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
     #setupPlayerBoardEventListeners(grid) {
       const game = this.#game;
       const boardRef = this;
+      this.#shipToPlaceName.textContent = `Select the position for your ${game.player.nextToPlace.name}`;
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
@@ -358,8 +367,11 @@ document.addEventListener("DOMContentLoaded", () => {
               );
             }
             if (game.player.areAllShipsPlacedOnBoard) {
+              this.#toggleOnOffElement(this.#shipToPlaceName);
               game.enemy.placeShips();
-              boardRef.showEnemyBoard();
+              boardRef.generateEnemyBoard();
+            } else {
+              this.#shipToPlaceName.textContent = `Select the position for your ${game.player.nextToPlace.name}`;
             }
           });
 
@@ -518,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return squaresToSelect;
     }
 
-    showEnemyBoard() {
+    generateEnemyBoard() {
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#enemyBoard.style.display = "grid";
