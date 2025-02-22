@@ -121,10 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#fleet = new Fleet();
     }
 
-    get fleet() {
-      return this.#fleet;
-    }
-
     get areAllShipsPlacedOnBoard() {
       return this.#fleet.areAllShipsPlacedOnBoard;
     }
@@ -140,10 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get isFleetSunk() {
       return this.#fleet.isFleetSunk;
-    }
-
-    findShipOnPosition(position) {
-      return this.#fleet.findShipOnPosition(position);
     }
 
     tryToPlaceShip(startingPosition, shipPlacementDirection) {
@@ -178,6 +170,14 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log(this.#fleet.fleetPositions);
       return canPlace;
     }
+
+    takeHit(position) {
+      const ship = this.#fleet.findShipOnPosition(position);
+      if (ship) {
+        ship.hitPosition = position;
+      }
+      return ship;
+    }
   }
 
   class AIPlayer extends Player {
@@ -197,13 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    takeTurn() {
+    getHitPosition() {
       const x = this.#generateRandomPosition();
       const y = this.#generateRandomPosition();
-      const position = new Position(x, y);
-      const ship = this.findShipOnPosition(position);
-      console.table(x, y);
-      return ship;
+      return new Position(x, y);
     }
 
     #generateRandomPosition() {
@@ -435,9 +432,8 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            const ship = game.enemy.findShipOnPosition(position);
+            const ship = game.enemy.takeHit(position);
             if (ship) {
-              ship.hitPosition = position;
               square.classList.add(`square--enemy-hit`);
               if (game.enemy.isFleetSunk) {
                 this.#resultMessageContainer.style.display = "flex";
@@ -445,17 +441,16 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             } else {
               square.classList.add(`square--enemy-miss`);
-              const ship = game.enemy.takeTurn();
+              const attakPosition = game.enemy.getHitPosition();
+              const ship = game.player.takeHit(attakPosition);
               if (ship) {
-                boardRef.changePlayerSquareClass(position, true);
-                if (game.player.isFleetSunk) {
-                  this.#resultMessageContainer.style.display = "flex";
-                  this.#resultMessage.textContent = "You lose";
-                } else {
-                  game.enemy.takeTurn();
-                }
+                boardRef.changePlayerSquareClass(attakPosition, true);
               } else {
-                boardRef.changePlayerSquareClass(position, false);
+                boardRef.changePlayerSquareClass(attakPosition, false);
+              }
+              if (game.player.isFleetSunk) {
+                this.#resultMessageContainer.style.display = "flex";
+                this.#resultMessage.textContent = "You lose";
               }
             }
           });
