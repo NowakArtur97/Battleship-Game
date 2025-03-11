@@ -204,14 +204,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    getHitPosition() {
+    getShotPosition() {
       const x = this.#generateRandomPosition();
       const y = this.#generateRandomPosition();
       const position = new Position(x, y);
-      if (
-        this.#hits.some((pos) => pos.x === position.x && pos.y === position.y)
-      ) {
-        this.getHitPosition();
+      const wasPositionAlreadyShot = this.#hits.some(
+        (pos) => pos.x === position.x && pos.y === position.y
+      );
+      if (wasPositionAlreadyShot) {
+        this.getShotPosition();
       }
       return position;
     }
@@ -454,12 +455,15 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             } else {
               square.classList.add(`square--enemy-miss`);
-              const attakPosition = game.enemy.getHitPosition();
-              const ship = game.player.takeHit(attakPosition);
-              if (ship) {
-                boardRef.changePlayerSquareClass(attakPosition, true);
-              } else {
-                boardRef.changePlayerSquareClass(attakPosition, false);
+              let shouldTakeTurn = true;
+              while (shouldTakeTurn) {
+                const enemyAttackPosition = game.enemy.getShotPosition();
+                const playerShip = game.player.takeHit(enemyAttackPosition);
+                shouldTakeTurn = playerShip !== undefined;
+                boardRef.changePlayerSquareClass(
+                  enemyAttackPosition,
+                  shouldTakeTurn
+                );
               }
               if (game.player.isFleetSunk) {
                 this.#resultMessageContainer.style.display = "flex";
