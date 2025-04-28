@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BattleshipgameApplication {
+public class BattleshipGameApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BattleshipgameApplication.class, args);
+		SpringApplication.run(BattleshipGameApplication.class, args);
 	}
 
 }
