@@ -240,9 +240,11 @@ document.addEventListener("DOMContentLoaded", () => {
     #shipPlacementDirection = Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY;
     #player;
     #enemy;
+    #webSocketManager;
 
     constructor(board) {
       this.#board = board;
+      this.#webSocketManager = new WebSocketManager(123);
       this.#player = new Player();
       this.#enemy = new AIPlayer();
       this.#board.prepareBoardForGame();
@@ -267,6 +269,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set shipPlacementDirection(shipPlacementDirection) {
       this.#shipPlacementDirection = shipPlacementDirection;
+    }
+  }
+
+  class WebSocketManager {
+
+    #socket;
+
+    constructor(gameId) {
+      this.#socket = new WebSocket(`ws://localhost:8080/ws/game/${gameId}`);
+
+      this.#socket.onopen = () => {
+        console.log("Coonected to game with id", gameId);
+      };
+      this.#socket.onmessage = (event) => {
+        console.log("Received message: ", event.data);
+      };
+      this.#socket.onclose = () => {
+        console.log("Disconnected from game");
+      };
+      this.#socket.onerror = (e) => {
+        console.log("Error:", e);
+      };
+    }
+
+    sendMessage() {
+      if (this.#socket.readyState !== WebSocket.OPEN) {
+        setTimeout(() => this.#socket.send("Initial message"), 500);
+      } else {
+        setTimeout(() => this.#socket.send(""), 500);
+      }
     }
   }
 
