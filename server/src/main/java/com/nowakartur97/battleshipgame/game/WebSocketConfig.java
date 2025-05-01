@@ -13,11 +13,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     public final static String WEB_SOCKET_PATH = "/ws/game";
 
-    private final BattleshipGameWebSocketHandler battleshipGameWebSocketHandler;
+    private final GameWebSocketHandler gameWebSocketHandler;
 
     @Override
     public void registerWebSocketHandlers(final WebSocketHandlerRegistry registry) {
-        registry.addHandler(battleshipGameWebSocketHandler, String.format("%s/{gameId}", WEB_SOCKET_PATH))
+        registry.addHandler(gameWebSocketHandler, String.format("%s/{gameId}", WEB_SOCKET_PATH))
                 .setAllowedOriginPatterns("*");
     }
 }

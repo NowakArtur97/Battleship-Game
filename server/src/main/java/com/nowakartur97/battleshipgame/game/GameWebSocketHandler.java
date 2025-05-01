@@ -17,7 +17,7 @@ import static com.nowakartur97.battleshipgame.game.WebSocketConfig.WEB_SOCKET_PA
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class BattleshipGameWebSocketHandler extends TextWebSocketHandler {
+public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private final Map<String, Set<WebSocketSession>> games = new ConcurrentHashMap<>();
 
@@ -31,11 +31,9 @@ public class BattleshipGameWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
         final String gameId = getGameId(session);
         final Set<WebSocketSession> sessions = games.get(gameId);
-        if (games != null) {
-            sessions.remove(session);
-            if (sessions.isEmpty()) {
-                games.remove(gameId);
-            }
+        sessions.remove(session);
+        if (sessions.isEmpty()) {
+            games.remove(gameId);
         }
     }
 
@@ -43,13 +41,11 @@ public class BattleshipGameWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
         final String gameId = getGameId(session);
         final Set<WebSocketSession> sessions = games.get(gameId);
-        if (games != null) {
-            for (final WebSocketSession s : sessions) {
-                if (s.isOpen()) {
-                    final String payload = message.getPayload();
-                    log.info("Received message: {}", payload);
-                    s.sendMessage(new TextMessage(payload));
-                }
+        for (final WebSocketSession s : sessions) {
+            if (s.isOpen()) {
+                final String payload = message.getPayload();
+                log.info("Received message: {}", payload);
+                s.sendMessage(new TextMessage(payload));
             }
         }
     }
