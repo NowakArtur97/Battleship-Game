@@ -44,8 +44,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         for (final WebSocketSession s : sessions) {
             if (s.isOpen()) {
                 final String payload = message.getPayload();
-                log.info("Received message: {}", payload);
-                s.sendMessage(new TextMessage(payload));
+                log.info("Received message for game {}: {}", gameId, payload);
+                synchronized (s) {
+                    s.sendMessage(new TextMessage(payload));
+                }
             }
         }
     }
