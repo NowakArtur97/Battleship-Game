@@ -83,8 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     constructor() {
       this.#ships = [
-        // new Ship("carrier", 5),
-        // new Ship("battleship", 4),
+        // new Ship("carrier", 5), new Ship("battleship", 4),
         // new Ship("cruiser", 3),
         // new Ship("submarine", 3),
         new Ship("destroyer", 2),
@@ -116,9 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   class Player {
     #fleet;
+    #name;
 
     constructor() {
       this.#fleet = new Fleet();
+      this.#name = this.#generateRandomName();
     }
 
     get areAllShipsPlacedOnBoard() {
@@ -136,6 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get isFleetSunk() {
       return this.#fleet.isFleetSunk;
+    }
+
+    get name() {
+      return this.#name;
     }
 
     tryToPlaceShip(startingPosition, shipPlacementDirection) {
@@ -176,6 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ship.hitPosition = position;
       }
       return ship;
+    }
+
+    #generateRandomName() {
+      return (Math.random() + 1).toString(36).substring(7);
     }
   }
 
@@ -509,7 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
-            console.log("AAA");
             if (square.classList.contains(...[`square--hit`, `square--miss`])) {
               return;
             }
@@ -520,6 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //   return;
             // }
             // const position = Position.fromString(square.dataset.position);
+
             // const ship = game.enemy.takeHit(position);
             // if (ship) {
             //   square.classList.add(`square--enemy-hit`);
@@ -664,6 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
   class WebSocketManager {
     static MESSAGE_STATUS = Object.freeze({
       ATTACK_START: Symbol("attack_start"),
+      ATTACK_RESULT: Symbol("attack_result"),
     });
 
     #game;
@@ -683,7 +693,22 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Coonected to game with id", this.#game.gameId);
       };
       this.#socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.gameId !== this.#game.gameId) {
+          return;
+        }
         console.log("Received message: ", event.data);
+        const status = data.status;
+        switch (status) {
+          case WebSocketManager.MESSAGE_STATUS.ATTACK_START.description: {
+            console.log("attack_start");
+            const playerShip = game.player.takeHit(Position.fromString(data.position));
+            this.sendMessage({ status: WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description, result: playerShip !== undefined });
+          }
+          case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
+            console.log("attack_result");
+          }
+        }
       };
       this.#socket.onclose = () => {
         console.log("Disconnected from game");
@@ -691,12 +716,14 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#socket.onerror = (e) => {
         console.log("Error:", e);
       };
-    }
+    };
 
     sendMessage(data) {
       if (this.#socket.readyState !== WebSocket.OPEN) {
         setTimeout(() => this.#socket.send("Initial message"), 500);
       } else {
+        data.from = this.#game.player.name;
+        data.gameId = this.#game.gameId;
         console.log("Sending message:", data);
         this.#socket.send(JSON.stringify(data));
       }
