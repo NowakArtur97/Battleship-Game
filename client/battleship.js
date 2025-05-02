@@ -524,36 +524,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const position = Position.fromString(square.dataset.position);
             game.enemy.takeHit(position, game.player.name);
-
-            // if (square.classList.contains(...[`square--hit`, `square--miss`])) {
-            //   return;
-            // }
-            // const position = Position.fromString(square.dataset.position);
-            // const ship = game.enemy.takeHit(position);
-
-            // if (ship) {
-            //   square.classList.add(`square--enemy-hit`);
-            //   if (game.enemy.isFleetSunk) {
-            //     this.#resultMessageContainer.style.display = "flex";
-            //     this.#resultMessage.textContent = "You won";
-            //   }
-            // } else {
-            //   square.classList.add(`square--enemy-miss`);
-            //   let shouldTakeTurn = true;
-            //   while (shouldTakeTurn) {
-            //     const enemyAttackPosition = game.enemy.getShotPosition();
-            //     const playerShip = game.player.takeHit(enemyAttackPosition);
-            //     shouldTakeTurn = playerShip !== undefined;
-            //     boardRef.changePlayerSquareClass(
-            //       enemyAttackPosition,
-            //       shouldTakeTurn
-            //     );
-            //   }
-            //   if (game.player.isFleetSunk) {
-            //     this.#resultMessageContainer.style.display = "flex";
-            //     this.#resultMessage.textContent = "You lose";
-            //   }
-            // }
           });
         });
       });
