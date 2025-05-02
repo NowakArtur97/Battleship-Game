@@ -481,7 +481,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #setupEnemyBoardEventListenersForAIPlayer(grid) {
       const game = this.#game;
-      const boardRef = this;
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
@@ -490,11 +489,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const position = Position.fromString(square.dataset.position);
             const ship = game.enemy.takeHit(position);
-            boardRef.changeEnemySquareClass(square, ship !== undefined);
+            this.changeEnemySquareClass(square, ship !== undefined);
             if (ship) {
               if (game.enemy.isFleetSunk) {
-                this.#resultMessageContainer.style.display = "flex";
-                this.#resultMessage.textContent = "You won";
+                this.displayResult(true);
               }
             } else {
               let shouldTakeTurn = true;
@@ -502,14 +500,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const enemyAttackPosition = game.enemy.getShotPosition();
                 const playerShip = game.player.takeHit(enemyAttackPosition);
                 shouldTakeTurn = playerShip !== undefined;
-                boardRef.changePlayerSquareClass(
+                this.changePlayerSquareClass(
                   enemyAttackPosition.asString,
                   shouldTakeTurn
                 );
               }
               if (game.player.isFleetSunk) {
-                this.#resultMessageContainer.style.display = "flex";
-                this.#resultMessage.textContent = "You lose";
+                this.displayResult(false);
               }
             }
           });
@@ -519,7 +516,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #setupEnemyBoardEventListenersForRealPlayer(grid) {
       const game = this.#game;
-      const boardRef = this;
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
@@ -533,8 +529,8 @@ document.addEventListener("DOMContentLoaded", () => {
             //   return;
             // }
             // const position = Position.fromString(square.dataset.position);
-
             // const ship = game.enemy.takeHit(position);
+
             // if (ship) {
             //   square.classList.add(`square--enemy-hit`);
             //   if (game.enemy.isFleetSunk) {
@@ -561,6 +557,11 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       });
+    }
+
+    displayResult(result) {
+      this.#resultMessageContainer.style.display = "flex";
+      this.#resultMessage.textContent = result ? "You won" : "You lose";
     }
 
     changeEnemySquareClass(square, isHit) {
@@ -682,6 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
     static MESSAGE_STATUS = Object.freeze({
       ATTACK_START: Symbol("attack_start"),
       ATTACK_RESULT: Symbol("attack_result"),
+      GAME_RESULT: Symbol("game_result"),
     });
 
     #game;
@@ -728,13 +730,24 @@ document.addEventListener("DOMContentLoaded", () => {
               const square = document.querySelector(`.square--enemy[data-position="${data.position}"]`);
               this.#board.changeEnemySquareClass(square, data.result);
             } else {
-              if (data.result) {
-                this.#game.player.takeHit(Position.fromString(data.position));
-              }
               this.#board.changePlayerSquareClass(
                 data.position,
                 data.result
               );
+              if (this.#game.player.isFleetSunk) {
+                this.sendMessage({
+                  status: WebSocketManager.MESSAGE_STATUS.GAME_RESULT.description,
+                  from: this.#game.player.name
+                });
+              }
+            }
+            break;
+          }
+          case WebSocketManager.MESSAGE_STATUS.GAME_RESULT.description: {
+            if (data.from === this.#game.player.name) {
+              this.#board.displayResult(false);
+            } else {
+              this.#board.displayResult(true);
             }
             break;
           }
