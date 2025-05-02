@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     constructor() {
       this.#fleet = new Fleet();
       this.#name = this.#generateRandomName();
+      console.log(this.#name);
     }
 
     get areAllShipsPlacedOnBoard() {
@@ -239,8 +240,13 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#webSocketManager = webSocketManager;
     }
 
-    takeHit(position) {
-      this.#webSocketManager.sendMessage({ status: WebSocketManager.MESSAGE_STATUS.ATTACK_START.description, position: position.asString });
+    // TODO: remove method and send message from event listener (?)
+    takeHit(position, from) {
+      this.#webSocketManager.sendMessage({
+        status: WebSocketManager.MESSAGE_STATUS.ATTACK_START.description,
+        position: position.asString,
+        from
+      });
     }
   }
 
@@ -484,21 +490,20 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const position = Position.fromString(square.dataset.position);
             const ship = game.enemy.takeHit(position);
+            boardRef.changeEnemySquareClass(square, ship !== undefined);
             if (ship) {
-              square.classList.add(`square--enemy-hit`);
               if (game.enemy.isFleetSunk) {
                 this.#resultMessageContainer.style.display = "flex";
                 this.#resultMessage.textContent = "You won";
               }
             } else {
-              square.classList.add(`square--enemy-miss`);
               let shouldTakeTurn = true;
               while (shouldTakeTurn) {
                 const enemyAttackPosition = game.enemy.getShotPosition();
                 const playerShip = game.player.takeHit(enemyAttackPosition);
                 shouldTakeTurn = playerShip !== undefined;
                 boardRef.changePlayerSquareClass(
-                  enemyAttackPosition,
+                  enemyAttackPosition.asString,
                   shouldTakeTurn
                 );
               }
@@ -522,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             const position = Position.fromString(square.dataset.position);
-            game.enemy.takeHit(position);
+            game.enemy.takeHit(position, game.player.name);
 
             // if (square.classList.contains(...[`square--hit`, `square--miss`])) {
             //   return;
@@ -558,13 +563,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    changeEnemySquareClass(square, isHit) {
+      square.classList.add(isHit ? `square--enemy-hit` : `square--enemy-miss`);
+    }
+
     changePlayerSquareClass(position, isHit) {
+      console.log(position, isHit);
       const square = this.#playerBoardGrid
         .flat(1)
-        .find((el) => el.dataset.position === position.asString);
-      square.classList.add(
-        isHit ? `square--player-hit` : `square--player-miss`
-      );
+        .find((el) => el.dataset.position === position);
+      square.classList.add(isHit ? `square--player-hit` : `square--player-miss`);
     }
 
     #prepareGrid(grid, squareType) {
@@ -677,14 +685,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     #game;
+    #board;
     #socket;
-
-    constructor() {
-    }
 
     set game(game) {
       this.#game = game;
       this.#socket = new WebSocket(`ws://localhost:8080/ws/game/${this.#game.gameId}`);
+    }
+
+    set board(board) {
+      this.#board = board;
       this.#initializeMethods();
     }
 
@@ -701,12 +711,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const status = data.status;
         switch (status) {
           case WebSocketManager.MESSAGE_STATUS.ATTACK_START.description: {
-            console.log("attack_start");
+            if (data.from === this.#game.player.name) {
+              return;
+            }
             const playerShip = game.player.takeHit(Position.fromString(data.position));
-            this.sendMessage({ status: WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description, result: playerShip !== undefined });
+            this.sendMessage({
+              status: WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description,
+              result: playerShip !== undefined,
+              from: data.from,
+              position: data.position
+            });
+            break;
           }
           case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
-            console.log("attack_result");
+            if (data.from === this.#game.player.name) {
+              const square = document.querySelector(`.square--enemy[data-position="${data.position}"]`);
+              this.#board.changeEnemySquareClass(square, data.result);
+            } else {
+              if (data.result) {
+                this.#game.player.takeHit(Position.fromString(data.position));
+              }
+              this.#board.changePlayerSquareClass(
+                data.position,
+                data.result
+              );
+            }
+            break;
           }
         }
       };
@@ -722,7 +752,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (this.#socket.readyState !== WebSocket.OPEN) {
         setTimeout(() => this.#socket.send("Initial message"), 500);
       } else {
-        data.from = this.#game.player.name;
         data.gameId = this.#game.gameId;
         console.log("Sending message:", data);
         this.#socket.send(JSON.stringify(data));
@@ -735,4 +764,5 @@ document.addEventListener("DOMContentLoaded", () => {
   const game = new Game(board, webSocketManager);
   board.game = game;
   webSocketManager.game = game;
+  webSocketManager.board = board;
 });
