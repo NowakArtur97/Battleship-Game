@@ -232,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   class RealPlayer extends Player {
-
     #webSocketManager;
 
     constructor(webSocketManager) {
@@ -245,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#webSocketManager.sendMessage({
         status: WebSocketManager.MESSAGE_STATUS.ATTACK_START.description,
         position: position.asString,
-        from
+        from,
       });
     }
   }
@@ -274,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     constructor(board, webSocketManager) {
       this.#board = board;
       this.#player = new Player();
-      this.#board.prepareBoardForGame();
+      this.#board.setupElementsVisibility();
       this.#gameId = 123; // TODO: Make random or get from user
       this.#webSocketManager = webSocketManager; // TODO: Make random or get from user
     }
@@ -289,9 +288,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set gameMode(gameMode) {
       this.#gameMode = gameMode;
-      this.#enemy = this.#gameMode === Game.GAME_MODE.PLAYER_VS_PLAYER
-        ? new RealPlayer(this.#webSocketManager) : new AIPlayer();
-      this.#board.generatePlayerBoard();
+      const isPlayerVsPlayerMode =
+        this.#gameMode === Game.GAME_MODE.PLAYER_VS_PLAYER;
+      this.#enemy = isPlayerVsPlayerMode
+        ? new RealPlayer(this.#webSocketManager)
+        : new AIPlayer();
+      if (!isPlayerVsPlayerMode) {
+        this.#board.generatePlayerBoard();
+      }
     }
 
     get shipPlacementDirection() {
@@ -305,6 +309,19 @@ document.addEventListener("DOMContentLoaded", () => {
     get gameId() {
       return this.#gameId;
     }
+
+    set gameId(gameId) {
+      this.#gameId = gameId;
+    }
+
+    createNewGameId() {
+      this.gameId = Math.floor(Math.random() * 7 + 1);
+    }
+
+    joinExistingGame(gameId) {
+      console.log(gameId);
+      this.gameId = gameId;
+    }
   }
 
   class Board {
@@ -315,6 +332,11 @@ document.addEventListener("DOMContentLoaded", () => {
     #enemyBoardGrid;
     #playerVsPlayerOptionBtn;
     #playerVsAIOptionBtn;
+    #createNewGameBtn;
+    #joinGameFirstStepBtn;
+    #joinGameSecondStepBtn;
+    #joinGameInput;
+    #joinGameLabel;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
     #shipToPlaceName;
@@ -330,13 +352,54 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#playerVsAIOptionBtn = document.querySelector(
         "#player_vs_ai_button"
       );
+      this.#createNewGameBtn = document.querySelector(
+        "#create_new_game_button"
+      );
+      this.#joinGameFirstStepBtn = document.querySelector(
+        "#join_game_button_first_step"
+      );
+      this.#joinGameSecondStepBtn = document.querySelector(
+        "#join_game_button_second_step"
+      );
+      this.#joinGameInput = document.querySelector("#join_game_input");
+      this.#joinGameLabel = document.querySelector("#join_game_label");
       this.#enemyBoard = document.querySelector(".board--enemy .squares");
-      this.#playerVsPlayerOptionBtn.addEventListener("click", () =>
-        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_PLAYER)
-      );
-      this.#playerVsAIOptionBtn.addEventListener("click", () =>
-        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_AI)
-      );
+      this.#playerVsPlayerOptionBtn.addEventListener("click", () => {
+        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_PLAYER);
+        this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
+        this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
+        this.#toggleOnOffElement(this.#createNewGameBtn);
+        this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
+      });
+      this.#playerVsAIOptionBtn.addEventListener("click", () => {
+        this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
+        this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
+        this.#startGameMode(Game.GAME_MODE.PLAYER_VS_AI);
+      });
+      this.#createNewGameBtn.addEventListener("click", () => {
+        this.#game.createNewGameId();
+        this.#toggleOnOffElement(this.#createNewGameBtn);
+        this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
+        this.generatePlayerBoard();
+      });
+      this.#joinGameFirstStepBtn.addEventListener("click", () => {
+        this.#toggleOnOffElement(this.#createNewGameBtn);
+        this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
+        this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
+        this.#toggleOnOffElement(this.#joinGameInput);
+        this.#toggleOnOffElement(this.#joinGameLabel);
+      });
+      this.#joinGameSecondStepBtn.addEventListener("click", () => {
+        console.log(this.#joinGameInput.value);
+        if (this.#joinGameInput.value === "") {
+          return;
+        }
+        this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
+        this.#toggleOnOffElement(this.#joinGameInput);
+        this.#toggleOnOffElement(this.#joinGameLabel);
+        this.#game.joinExistingGame(this.#joinGameInput.textContent);
+        this.generatePlayerBoard();
+      });
       this.#horizontalShipPlacementBtn = document.querySelector(
         "#horizontal_ship_placement_button"
       );
@@ -352,9 +415,14 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#enemyBoardGrid = [];
     }
 
-    prepareBoardForGame() {
+    setupElementsVisibility() {
       this.#toggleOnOffElement(this.#playerBoard);
       this.#toggleOnOffElement(this.#enemyBoard);
+      this.#toggleOnOffElement(this.#createNewGameBtn);
+      this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
+      this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
+      this.#toggleOnOffElement(this.#joinGameInput);
+      this.#toggleOnOffElement(this.#joinGameLabel);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#toggleOnOffElement(this.#shipToPlaceName);
@@ -366,8 +434,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     generatePlayerBoard() {
-      this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
-      this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
       this.#playerBoard.style.display = "grid";
       this.#generateBoard(
         this.#playerBoard,
@@ -378,15 +444,15 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#horizontalShipPlacementBtn.addEventListener(
         "click",
         () =>
-        (this.#game.shipPlacementDirection =
-          Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY)
+          (this.#game.shipPlacementDirection =
+            Game.SHIP_PLACEMENT_DIRECTION.HORIZONTALLY)
       );
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#verticalShipPlacementBtn.addEventListener(
         "click",
         () =>
-        (this.#game.shipPlacementDirection =
-          Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY)
+          (this.#game.shipPlacementDirection =
+            Game.SHIP_PLACEMENT_DIRECTION.VERTICALLY)
       );
       this.#toggleOnOffElement(this.#shipToPlaceName);
     }
@@ -451,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const squaresToSelect = boardRef.#selectSqaures(square, grid, game);
             const cssClass =
               squaresToSelect.length ===
-                game.player.numberOfSquaresToPlaceNextShip
+              game.player.numberOfSquaresToPlaceNextShip
                 ? `square--valid`
                 : `square--invalid`;
             squaresToSelect.forEach((el) => el.classList.add(cssClass));
@@ -543,7 +609,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const square = this.#playerBoardGrid
         .flat(1)
         .find((el) => el.dataset.position === position);
-      square.classList.add(isHit ? `square--player-hit` : `square--player-miss`);
+      square.classList.add(
+        isHit ? `square--player-hit` : `square--player-miss`
+      );
     }
 
     #prepareGrid(grid, squareType) {
@@ -662,7 +730,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set game(game) {
       this.#game = game;
-      this.#socket = new WebSocket(`ws://localhost:8080/ws/game/${this.#game.gameId}`);
+      this.#socket = new WebSocket(
+        `ws://localhost:8080/ws/game/${this.#game.gameId}`
+      );
     }
 
     set board(board) {
@@ -672,7 +742,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     #initializeMethods() {
       this.#socket.onopen = () => {
-        console.log("Coonected to game with id", this.#game.gameId);
+        console.log("Connected to game with id", this.#game.gameId);
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -686,28 +756,30 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.from === this.#game.player.name) {
               return;
             }
-            const playerShip = game.player.takeHit(Position.fromString(data.position));
+            const playerShip = game.player.takeHit(
+              Position.fromString(data.position)
+            );
             this.sendMessage({
               status: WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description,
               result: playerShip !== undefined,
               from: data.from,
-              position: data.position
+              position: data.position,
             });
             break;
           }
           case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
             if (data.from === this.#game.player.name) {
-              const square = document.querySelector(`.square--enemy[data-position="${data.position}"]`);
+              const square = document.querySelector(
+                `.square--enemy[data-position="${data.position}"]`
+              );
               this.#board.changeEnemySquareClass(square, data.result);
             } else {
-              this.#board.changePlayerSquareClass(
-                data.position,
-                data.result
-              );
+              this.#board.changePlayerSquareClass(data.position, data.result);
               if (this.#game.player.isFleetSunk) {
                 this.sendMessage({
-                  status: WebSocketManager.MESSAGE_STATUS.GAME_RESULT.description,
-                  from: this.#game.player.name
+                  status:
+                    WebSocketManager.MESSAGE_STATUS.GAME_RESULT.description,
+                  from: this.#game.player.name,
                 });
               }
             }
@@ -729,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#socket.onerror = (e) => {
         console.log("Error:", e);
       };
-    };
+    }
 
     sendMessage(data) {
       if (this.#socket.readyState !== WebSocket.OPEN) {
