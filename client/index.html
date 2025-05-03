@@ -18,25 +18,36 @@
           >
             Player vs Player
           </button>
-          <div class="board__content_wrapper">
-            <button
-              id="create_new_game_button"
-              class="board__game_option_button"
-            >
-              Create new game
-            </button>
-          </div>
+          <button id="create_new_game_button" class="board__game_option_button">
+            Create new game
+          </button>
+          <button
+            id="join_game_button_second_step"
+            class="board__game_option_button"
+          >
+            Join game
+          </button>
           <div class="squares"></div>
         </div>
         <div class="board board--enemy">
           <button id="player_vs_ai_button" class="board__game_option_button">
             Player vs AI
           </button>
-          <input
-            id="join_game_button"
+          <button
+            id="join_game_button_first_step"
             class="board__game_option_button"
-            placeholder="Enter existing game id"
-          />
+          >
+            Join other player game
+          </button>
+          <div class="board__content_wrapper">
+            <label
+              id="join_game_label"
+              class="board__game_option_label"
+              for="join_game_input"
+              >Game id:</label
+            >
+            <input id="join_game_input" class="board__game_option_input" />
+          </div>
           <div class="board__content_wrapper">
             <p class="board__ship_name"></p>
             <button
