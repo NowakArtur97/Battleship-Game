@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+  function generateRandomString() {
+    return (Math.random() + 1).toString(36).substring(7);
+  }
+
   class Position {
     #x;
     #y;
@@ -119,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     constructor() {
       this.#fleet = new Fleet();
-      this.#name = this.#generateRandomName();
+      this.#name = generateRandomString();
       console.log(this.#name);
     }
 
@@ -182,10 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ship.hitPosition = position;
       }
       return ship;
-    }
-
-    #generateRandomName() {
-      return (Math.random() + 1).toString(36).substring(7);
     }
   }
 
@@ -270,12 +270,11 @@ document.addEventListener("DOMContentLoaded", () => {
     #gameId;
     #webSocketManager;
 
-    constructor(board, webSocketManager) {
+    constructor(board) {
       this.#board = board;
       this.#player = new Player();
+      this.#webSocketManager = new WebSocketManager(this, this.#board);
       this.#board.setupElementsVisibility();
-      this.#gameId = 123; // TODO: Make random or get from user
-      this.#webSocketManager = webSocketManager; // TODO: Make random or get from user
     }
 
     get player() {
@@ -312,15 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set gameId(gameId) {
       this.#gameId = gameId;
-    }
-
-    createNewGameId() {
-      this.gameId = Math.floor(Math.random() * 7 + 1);
-    }
-
-    joinExistingGame(gameId) {
-      console.log(gameId);
-      this.gameId = gameId;
+      this.#webSocketManager.initializeMethods();
     }
   }
 
@@ -377,9 +368,9 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#startGameMode(Game.GAME_MODE.PLAYER_VS_AI);
       });
       this.#createNewGameBtn.addEventListener("click", () => {
-        this.#game.createNewGameId();
         this.#toggleOnOffElement(this.#createNewGameBtn);
         this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
+        this.#game.gameId = generateRandomString();
         this.generatePlayerBoard();
       });
       this.#joinGameFirstStepBtn.addEventListener("click", () => {
@@ -397,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
         this.#toggleOnOffElement(this.#joinGameInput);
         this.#toggleOnOffElement(this.#joinGameLabel);
-        this.#game.joinExistingGame(this.#joinGameInput.textContent);
+        this.#game.gameId = this.#joinGameInput.value;
         this.generatePlayerBoard();
       });
       this.#horizontalShipPlacementBtn = document.querySelector(
@@ -566,6 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const enemyAttackPosition = game.enemy.getShotPosition();
                 const playerShip = game.player.takeHit(enemyAttackPosition);
                 shouldTakeTurn = playerShip !== undefined;
+                console.log(enemyAttackPosition);
                 this.changePlayerSquareClass(
                   enemyAttackPosition.asString,
                   shouldTakeTurn
@@ -605,7 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     changePlayerSquareClass(position, isHit) {
-      console.log(position, isHit);
       const square = this.#playerBoardGrid
         .flat(1)
         .find((el) => el.dataset.position === position);
@@ -728,19 +719,15 @@ document.addEventListener("DOMContentLoaded", () => {
     #board;
     #socket;
 
-    set game(game) {
+    constructor(game, board) {
       this.#game = game;
+      this.#board = board;
+    }
+
+    initializeMethods() {
       this.#socket = new WebSocket(
         `ws://localhost:8080/ws/game/${this.#game.gameId}`
       );
-    }
-
-    set board(board) {
-      this.#board = board;
-      this.#initializeMethods();
-    }
-
-    #initializeMethods() {
       this.#socket.onopen = () => {
         console.log("Connected to game with id", this.#game.gameId);
       };
@@ -815,9 +802,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const board = new Board();
-  const webSocketManager = new WebSocketManager();
-  const game = new Game(board, webSocketManager);
+  const game = new Game(board);
   board.game = game;
-  webSocketManager.game = game;
-  webSocketManager.board = board;
 });
