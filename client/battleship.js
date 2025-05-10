@@ -328,6 +328,8 @@ document.addEventListener("DOMContentLoaded", () => {
     #joinGameSecondStepBtn;
     #joinGameInput;
     #joinGameLabel;
+    #waitContainer;
+    #boardMessage;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
     #shipToPlaceName;
@@ -358,6 +360,10 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#joinGameInput = document.querySelector("#join_game_input");
       this.#joinGameLabel = document.querySelector("#join_game_label");
+      this.#waitContainer = document.querySelector(
+        ".board__squares_wait_container"
+      );
+      this.#boardMessage = document.querySelector(".board__message");
       this.#enemyBoard = document.querySelector(
         ".board--enemy .board__squares"
       );
@@ -376,8 +382,12 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#createNewGameBtn.addEventListener("click", () => {
         this.#toggleOnOffElement(this.#createNewGameBtn);
         this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
-        this.#game.gameId = generateRandomString();
+        const gameId = generateRandomString();
+        this.#game.gameId = gameId;
         this.generatePlayerBoard();
+        this.#toggleOnOffElement(this.#boardMessage);
+        this.#waitContainer.style.display = "flex";
+        this.#boardMessage.innerHTML = `Waiting for a second player to join your game. Game id: <span class='board__game_id'>${gameId}</span>`;
       });
       this.#joinGameFirstStepBtn.addEventListener("click", () => {
         this.#toggleOnOffElement(this.#createNewGameBtn);
@@ -420,6 +430,8 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
       this.#toggleOnOffElement(this.#joinGameInput);
       this.#toggleOnOffElement(this.#joinGameLabel);
+      this.#toggleOnOffElement(this.#waitContainer);
+      this.#toggleOnOffElement(this.#boardMessage);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#toggleOnOffElement(this.#shipToPlaceName);
@@ -716,6 +728,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+    hideMessageContainer() {
+      this.#toggleOnOffElement(this.#waitContainer);
+      this.#toggleOnOffElement(this.#boardMessage);
+    }
+
     #toggleOnOffElement(element) {
       const { style } = element;
       style.display = style.display === "none" ? "block" : "none";
@@ -728,6 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   class WebSocketManager {
     static MESSAGE_STATUS = Object.freeze({
+      JOIN_GAME: Symbol("join_game"),
       ATTACK_START: Symbol("attack_start"),
       ATTACK_RESULT: Symbol("attack_result"),
       GAME_RESULT: Symbol("game_result"),
@@ -748,6 +766,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#socket.onopen = () => {
         console.log("Connected to game with id", this.#game.gameId);
+        this.sendMessage({
+          status: WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description,
+          from: this.#game.player.name,
+          gameId: this.#game.gameId,
+        });
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -757,6 +780,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Received message: ", event.data);
         const status = data.status;
         switch (status) {
+          case WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description: {
+            if (data.from !== this.#game.player.name) {
+              this.#board.hideMessageContainer(false);
+            }
+            break;
+          }
           case WebSocketManager.MESSAGE_STATUS.ATTACK_START.description: {
             if (data.from === this.#game.player.name) {
               return;
@@ -810,7 +839,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sendMessage(data) {
       if (this.#socket.readyState !== WebSocket.OPEN) {
-        setTimeout(() => this.#socket.send("Initial message"), 500);
+        setTimeout(
+          () =>
+            this.#socket.send(JSON.stringify({ message: "Initial message" })),
+          500
+        );
       } else {
         data.gameId = this.#game.gameId;
         console.log("Sending message:", data);

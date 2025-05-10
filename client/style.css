@@ -54,7 +54,7 @@ html {
   margin: auto;
 
   color: hsl(0, 0%, 0%);
-  font-size: 1.5em;
+  font-size: 1.5rem;
   white-space: nowrap;
   text-align: center;
 
@@ -75,7 +75,7 @@ html {
   margin: auto;
 
   color: hsl(0, 0%, 0%);
-  font-size: 1.25em;
+  font-size: 1.25rem;
   white-space: nowrap;
   text-align: center;
 
@@ -92,17 +92,18 @@ html {
 }
 
 .board__game_option_input:focus {
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 
 .board__ship_name {
   width: 100%;
   text-align: center;
   color: hsl(0, 0%, 0%);
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 
 .board__squares {
+  position: relative;
   display: grid;
   justify-content: center;
   align-items: center;
@@ -122,7 +123,7 @@ html {
   height: calc(50vh / 10);
   width: calc(50vh / 10);
 
-  font-size: 1em;
+  font-size: 1rem;
   color: hsl(0, 0%, 100%);
 
   transform: scale(0);
@@ -170,10 +171,36 @@ html {
   background-color: hsl(250, 100%, 50%);
 }
 
+.board__squares_wait_container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  background-color: hsla(0, 0%, 0%, 0.75);
+  z-index: 1;
+}
+
+.board__message {
+  padding: 0 20%;
+
+  font-size: 1.5rem;
+  color: hsl(0, 0%, 100%);
+  text-align: center;
+}
+
+.board__game_id {
+  font-size: 1.5rem;
+  color: hsl(0, 100%, 50%);
+}
+
 .board__result_message__container {
   position: absolute;
-  top: 0%;
-  left: 0%;
+  top: 0;
+  left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -185,7 +212,7 @@ html {
 .board__result_message {
   padding: 1.25% 2.5%;
   color: hsl(0, 0%, 100%);
-  font-size: 4.5em;
+  font-size: 4.5rem;
 }
 
 @media (orientation: landscape) {
@@ -207,41 +234,45 @@ html {
 @media (min-width: 720px) {
   .board__game_option_button,
   .board__square,
-  .board__ship_name {
-    font-size: 2em;
+  .board__ship_name,
+  .board__message,
+  .board__game_id {
+    font-size: 2rem;
   }
 
   .board__game_option_input,
   .board__game_option_label {
-    font-size: 1.75em;
+    font-size: 1.75rem;
   }
 
   .board__game_option_input:focus {
-    font-size: 2em;
+    font-size: 2rem;
   }
 
   .board__result_message {
-    font-size: 6em;
+    font-size: 6rem;
   }
 }
 
 @media (min-width: 1024px) {
   .board__game_option_button,
   .board__square,
-  .board__ship_name {
-    font-size: 2.5em;
+  .board__ship_name,
+  .board__message,
+  .board__game_id {
+    font-size: 2.5rem;
   }
 
   .board__game_option_input,
   .board__game_option_label {
-    font-size: 2.25em;
+    font-size: 2.25rem;
   }
 
   .board__game_option_input:focus {
-    font-size: 2.5em;
+    font-size: 2.5rem;
   }
 
   .board__result_message {
-    font-size: 7.5em;
+    font-size: 7.5rem;
   }
 }
