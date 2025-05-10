@@ -335,8 +335,12 @@ document.addEventListener("DOMContentLoaded", () => {
     #resultMessage;
 
     constructor() {
-      this.#playerBoard = document.querySelector(".board--player .squares");
-      this.#enemyBoard = document.querySelector(".board--enemy .squares");
+      this.#playerBoard = document.querySelector(
+        ".board--player .board__squares"
+      );
+      this.#enemyBoard = document.querySelector(
+        ".board--enemy .board__squares"
+      );
       this.#playerVsPlayerOptionBtn = document.querySelector(
         "#player_vs_player_button"
       );
@@ -354,7 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#joinGameInput = document.querySelector("#join_game_input");
       this.#joinGameLabel = document.querySelector("#join_game_label");
-      this.#enemyBoard = document.querySelector(".board--enemy .squares");
+      this.#enemyBoard = document.querySelector(
+        ".board--enemy .board__squares"
+      );
       this.#playerVsPlayerOptionBtn.addEventListener("click", () => {
         this.#startGameMode(Game.GAME_MODE.PLAYER_VS_PLAYER);
         this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
@@ -399,9 +405,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#shipToPlaceName = document.querySelector(".board__ship_name");
       this.#resultMessageContainer = document.querySelector(
-        ".result_message__container"
+        ".board__result_message__container"
       );
-      this.#resultMessage = document.querySelector(".result_message");
+      this.#resultMessage = document.querySelector(".board__result_message");
       this.#playerBoardGrid = [];
       this.#enemyBoardGrid = [];
     }
@@ -487,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             if (canPlace) {
               squaresToSelect.forEach((el) =>
-                el.classList.add(`square--taken`)
+                el.classList.add(`board__square--taken`)
               );
             }
             if (game.player.areAllShipsPlacedOnBoard) {
@@ -509,8 +515,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const cssClass =
               squaresToSelect.length ===
               game.player.numberOfSquaresToPlaceNextShip
-                ? `square--valid`
-                : `square--invalid`;
+                ? `board__square--valid`
+                : `board__square--invalid`;
             squaresToSelect.forEach((el) => el.classList.add(cssClass));
           });
 
@@ -528,7 +534,9 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let i = 0; i <= numberOfSquaresToPlaceNextShip; i++) {
               const el = squaresToUnselect[i];
               if (el) {
-                el.classList.remove(...[`square--valid`, `square--invalid`]);
+                el.classList.remove(
+                  ...[`board__square--valid`, `board__square--invalid`]
+                );
               }
             }
           });
@@ -541,7 +549,11 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
-            if (square.classList.contains(...[`square--hit`, `square--miss`])) {
+            if (
+              square.classList.contains(
+                ...[`board__square--hit`, `board__square--miss`]
+              )
+            ) {
               return;
             }
             const position = Position.fromString(square.dataset.position);
@@ -577,7 +589,11 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
-            if (square.classList.contains(...[`square--hit`, `square--miss`])) {
+            if (
+              square.classList.contains(
+                ...[`board__square--hit`, `board__square--miss`]
+              )
+            ) {
               return;
             }
             const position = Position.fromString(square.dataset.position);
@@ -593,7 +609,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     changeEnemySquareClass(square, isHit) {
-      square.classList.add(isHit ? `square--enemy-hit` : `square--enemy-miss`);
+      square.classList.add(
+        isHit ? `board__square--enemy-hit` : `board__square--enemy-miss`
+      );
     }
 
     changePlayerSquareClass(position, isHit) {
@@ -601,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .flat(1)
         .find((el) => el.dataset.position === position);
       square.classList.add(
-        isHit ? `square--player-hit` : `square--player-miss`
+        isHit ? `board__square--player-hit` : `board__square--player-miss`
       );
     }
 
@@ -612,7 +630,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let column = 0; column < 8; column++) {
           const square = document.createElement("div");
           square.classList.add(
-            ...["square", `square--${squareType.description}`]
+            ...["board__square", `board__square--${squareType.description}`]
           );
           const isInNotInFirstRowAndColumn = row !== 0 && column !== 0;
           if (isInNotInFirstRowAndColumn) {
@@ -664,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const el = rowOfSquares[squareColumnIndex + i];
           if (
             squareColumnIndex + i < 8 &&
-            !el.classList.contains(`square--taken`)
+            !el.classList.contains(`board__square--taken`)
           ) {
             squaresToSelect.push(el);
           }
@@ -678,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const el = row[squareColumnIndex];
           if (
             squareRowIndex + i < 8 &&
-            !el.classList.contains(`square--taken`)
+            !el.classList.contains(`board__square--taken`)
           ) {
             squaresToSelect.push(el);
           }
@@ -757,7 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
           case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
             if (data.from === this.#game.player.name) {
               const square = document.querySelector(
-                `.square--enemy[data-position="${data.position}"]`
+                `.board__square--enemy[data-position="${data.position}"]`
               );
               this.#board.changeEnemySquareClass(square, data.result);
             } else {

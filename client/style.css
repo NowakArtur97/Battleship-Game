@@ -102,7 +102,7 @@ html {
   font-size: 1.5em;
 }
 
-.squares {
+.board__squares {
   display: grid;
   justify-content: center;
   align-items: center;
@@ -113,7 +113,7 @@ html {
   width: 100%;
 }
 
-.square {
+.board__square {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -135,42 +135,42 @@ html {
   }
 }
 
-.square--player {
+.board__square--player {
   background-color: hsl(250, 100%, 50%);
 }
 
-.square--enemy {
+.board__square--enemy {
   background-color: hsl(0, 100%, 50%);
 }
 
-.square--valid {
+.board__square--valid {
   background-color: hsl(120, 100%, 25%);
 }
 
-.square--invalid {
+.board__square--invalid {
   background-color: hsl(0, 100%, 50%);
 }
 
-.square--taken {
+.board__square--taken {
   background-color: hsl(120, 100%, 25%);
 }
 
-.square--player-hit {
+.board__square--player-hit {
   background-color: hsl(0, 100%, 50%);
 }
 
-.square--player-miss {
+.board__square--player-miss {
   background-color: hsl(46, 100%, 50%);
 }
-.square--enemy-hit {
+.board__square--enemy-hit {
   background-color: hsl(120, 100%, 25%);
 }
 
-.square--enemy-miss {
+.board__square--enemy-miss {
   background-color: hsl(250, 100%, 50%);
 }
 
-.result_message__container {
+.board__result_message__container {
   position: absolute;
   top: 0%;
   left: 0%;
@@ -182,7 +182,7 @@ html {
   background-color: hsla(0, 0%, 0%, 0.75);
 }
 
-.result_message {
+.board__result_message {
   padding: 1.25% 2.5%;
   color: hsl(0, 0%, 100%);
   font-size: 4.5em;
@@ -198,7 +198,7 @@ html {
     width: 50%;
   }
 
-  .square {
+  .board__square {
     height: calc(50vw / 10);
     width: calc(50vw / 10);
   }
@@ -206,7 +206,7 @@ html {
 
 @media (min-width: 720px) {
   .board__game_option_button,
-  .square,
+  .board__square,
   .board__ship_name {
     font-size: 2em;
   }
@@ -220,14 +220,14 @@ html {
     font-size: 2em;
   }
 
-  .result_message {
+  .board__result_message {
     font-size: 6em;
   }
 }
 
 @media (min-width: 1024px) {
   .board__game_option_button,
-  .square,
+  .board__square,
   .board__ship_name {
     font-size: 2.5em;
   }
@@ -241,7 +241,7 @@ html {
     font-size: 2.5em;
   }
 
-  .result_message {
+  .board__result_message {
     font-size: 7.5em;
   }
 }
