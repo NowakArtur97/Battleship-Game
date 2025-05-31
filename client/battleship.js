@@ -120,10 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
   class Player {
     #fleet;
     #name;
+    #hasTurn;
 
     constructor() {
       this.#fleet = new Fleet();
       this.#name = generateRandomString();
+      this.#hasTurn = false;
       console.log(this.#name);
     }
 
@@ -146,6 +148,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get name() {
       return this.#name;
+    }
+
+    get hasTurn() {
+      return this.#hasTurn;
+    }
+
+    set hasTurn(hasTurn) {
+      this.#hasTurn = hasTurn;
     }
 
     tryToPlaceShip(startingPosition, shipPlacementDirection) {
@@ -425,7 +435,6 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#toggleOnOffElement(this.#joinGameLabel);
       });
       this.#joinGameSecondStepBtn.addEventListener("click", () => {
-        console.log(this.#joinGameInput.value);
         if (this.#joinGameInput.value === "") {
           return;
         }
@@ -540,6 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
               this.#toggleOnOffElement(this.#shipToPlaceName);
               if (game.enemy instanceof AIPlayer) {
                 game.enemy.placeShips();
+                game.player.hasTurn = true;
               } else if (game.player.name !== game.gameOwnerName) {
                 game.startGame();
               }
@@ -631,7 +641,6 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
-            console.log(game.hasGameStarted);
             if (
               !game.hasGameStarted ||
               square.classList.contains(
@@ -807,7 +816,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        // TODO: Check if gameId can be removed
         if (data.gameId !== this.#game.gameId) {
           return;
         }
@@ -817,6 +825,14 @@ document.addEventListener("DOMContentLoaded", () => {
           case WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description: {
             if (data.from !== this.#game.player.name) {
               this.#board.hideMessageContainer(false);
+            }
+            break;
+          }
+          case WebSocketManager.MESSAGE_STATUS.START_GAME.description: {
+            this.#game.hasGameStarted = true;
+            if (this.#game.player.name === this.#game.gameOwnerName) {
+              this.#game.player.hasTurn = true;
+              console.log("gameOwnerName");
             }
             break;
           }
@@ -835,16 +851,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             break;
           }
-          case WebSocketManager.MESSAGE_STATUS.START_GAME.description: {
-            this.#game.hasGameStarted = true;
-            break;
-          }
           case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
             if (data.from === this.#game.player.name) {
               const square = document.querySelector(
                 `.board__square--enemy[data-position="${data.position}"]`
               );
               this.#board.changeEnemySquareClass(square, data.result);
+              if (!data.result) {
+                this.#game.player.hasTurn = false;
+              }
             } else {
               this.#board.changePlayerSquareClass(data.position, data.result);
               if (this.#game.player.isFleetSunk) {
@@ -853,6 +868,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     WebSocketManager.MESSAGE_STATUS.GAME_RESULT.description,
                   from: this.#game.player.name,
                 });
+              } else if (!data.result) {
+                this.#game.player.hasTurn = true;
               }
             }
             break;
