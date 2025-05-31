@@ -231,8 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
         (pos) => pos.x === position.x && pos.y === position.y
       );
       if (wasPositionAlreadyShot) {
-        this.getShotPosition();
+        return this.getShotPosition();
       }
+      this.#hits.push(position);
       return position;
     }
 
