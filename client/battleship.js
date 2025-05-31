@@ -269,6 +269,8 @@ document.addEventListener("DOMContentLoaded", () => {
     #enemy;
     #gameId;
     #webSocketManager;
+    #hasGameStarted = false;
+    #gameOwnerName;
 
     constructor(board) {
       this.#board = board;
@@ -312,6 +314,30 @@ document.addEventListener("DOMContentLoaded", () => {
     set gameId(gameId) {
       this.#gameId = gameId;
       this.#webSocketManager.initializeMethods();
+    }
+
+    get gameOwnerName() {
+      return this.#gameOwnerName;
+    }
+
+    set gameOwnerName(gameOwnerName) {
+      this.#gameOwnerName = gameOwnerName;
+    }
+
+    get hasGameStarted() {
+      return this.#hasGameStarted;
+    }
+
+    set hasGameStarted(hasGameStarted) {
+      this.#hasGameStarted = hasGameStarted;
+    }
+
+    startGame() {
+      this.#webSocketManager.sendMessage({
+        status: WebSocketManager.MESSAGE_STATUS.START_GAME.description,
+        from: game.player.name,
+        gameId: game.gameId,
+      });
     }
   }
 
@@ -378,6 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#toggleOnOffElement(this.#playerVsPlayerOptionBtn);
         this.#toggleOnOffElement(this.#playerVsAIOptionBtn);
         this.#startGameMode(Game.GAME_MODE.PLAYER_VS_AI);
+        this.#game.hasGameStarted = true;
       });
       this.#createNewGameBtn.addEventListener("click", () => {
         this.#toggleOnOffElement(this.#createNewGameBtn);
@@ -388,6 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#toggleOnOffElement(this.#boardMessage);
         this.#waitContainer.style.display = "flex";
         this.#boardMessage.innerHTML = `Waiting for a second player to join your game. Game id: <span class='board__game_id'>${gameId}</span>`;
+        this.#game.gameOwnerName = this.#game.player.name;
       });
       this.#joinGameFirstStepBtn.addEventListener("click", () => {
         this.#toggleOnOffElement(this.#createNewGameBtn);
@@ -512,6 +540,8 @@ document.addEventListener("DOMContentLoaded", () => {
               this.#toggleOnOffElement(this.#shipToPlaceName);
               if (game.enemy instanceof AIPlayer) {
                 game.enemy.placeShips();
+              } else if (game.player.name !== game.gameOwnerName) {
+                game.startGame();
               }
               boardRef.generateEnemyBoard();
             } else {
@@ -601,7 +631,9 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
+            console.log(game.hasGameStarted);
             if (
+              !game.hasGameStarted ||
               square.classList.contains(
                 ...[`board__square--hit`, `board__square--miss`]
               )
@@ -746,6 +778,7 @@ document.addEventListener("DOMContentLoaded", () => {
   class WebSocketManager {
     static MESSAGE_STATUS = Object.freeze({
       JOIN_GAME: Symbol("join_game"),
+      START_GAME: Symbol("start_game"),
       ATTACK_START: Symbol("attack_start"),
       ATTACK_RESULT: Symbol("attack_result"),
       GAME_RESULT: Symbol("game_result"),
@@ -774,6 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        // TODO: Check if gameId can be removed
         if (data.gameId !== this.#game.gameId) {
           return;
         }
@@ -799,6 +833,10 @@ document.addEventListener("DOMContentLoaded", () => {
               from: data.from,
               position: data.position,
             });
+            break;
+          }
+          case WebSocketManager.MESSAGE_STATUS.START_GAME.description: {
+            this.#game.hasGameStarted = true;
             break;
           }
           case WebSocketManager.MESSAGE_STATUS.ATTACK_RESULT.description: {
