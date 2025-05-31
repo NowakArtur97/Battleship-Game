@@ -602,8 +602,11 @@ document.addEventListener("DOMContentLoaded", () => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
             if (
-              square.classList.contains(
-                ...[`board__square--hit`, `board__square--miss`]
+              [...square.classList].some((c) =>
+                [
+                  `board__square--enemy-hit`,
+                  `board__square--enemy-miss`,
+                ].includes(c)
               )
             ) {
               return;
@@ -643,8 +646,12 @@ document.addEventListener("DOMContentLoaded", () => {
           square.addEventListener("click", () => {
             if (
               !game.hasGameStarted ||
-              square.classList.contains(
-                ...[`board__square--hit`, `board__square--miss`]
+              !game.player.hasTurn ||
+              [...square.classList].some((c) =>
+                [
+                  `board__square--enemy-hit`,
+                  `board__square--enemy-miss`,
+                ].includes(c)
               )
             ) {
               return;
