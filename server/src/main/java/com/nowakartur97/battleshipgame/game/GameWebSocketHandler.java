@@ -24,6 +24,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) {
         final String gameId = getGameId(session);
+        log.info("Connection established for game: {}", gameId);
         games.computeIfAbsent(gameId, game -> ConcurrentHashMap.newKeySet()).add(session);
     }
 
@@ -32,6 +33,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         final String gameId = getGameId(session);
         final Set<WebSocketSession> sessions = games.get(gameId);
         sessions.remove(session);
+        log.info("Session closed for game: {}", gameId);
         if (sessions.isEmpty()) {
             games.remove(gameId);
         }
@@ -44,7 +46,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         for (final WebSocketSession s : sessions) {
             if (s.isOpen()) {
                 final String payload = message.getPayload();
-                log.info("Received message for game {}: {}", gameId, payload);
+                log.info("Received message {} for game: {}", payload, gameId);
                 synchronized (s) {
                     s.sendMessage(new TextMessage(payload));
                 }
@@ -53,6 +55,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private String getGameId(final WebSocketSession session) {
-        return session.getUri().getPath().split(WEB_SOCKET_PATH)[0];
+        return session.getUri().getPath().split(WEB_SOCKET_PATH)[1];
     }
 }
