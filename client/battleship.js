@@ -480,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
       this.#toggleOnOffElement(this.#joinGameInput);
       this.#toggleOnOffElement(this.#joinGameLabel);
+      this.#toggleOnOffElement(this.#joinGameMessage);
       this.#toggleOnOffElement(this.#waitContainer);
       this.#toggleOnOffElement(this.#boardMessage);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
@@ -823,20 +824,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     initializeMethods() {
-      this.#socket = new WebSocket(
-        `ws://localhost:8080/ws/game/${this.#game.gameId}`
-      );
+      const gameId = this.#game.gameId;
+      this.#socket = new WebSocket(`ws://localhost:8080/ws/game/${gameId}`);
       this.#socket.onopen = () => {
-        console.log("Connected to game with id", this.#game.gameId);
+        console.log("Connected to game with id", gameId);
         this.sendMessage({
           status: WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description,
           from: this.#game.player.name,
-          gameId: this.#game.gameId,
+          gameId,
         });
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.gameId !== this.#game.gameId) {
+        if (data.gameId !== gameId) {
           return;
         }
         console.log("Received message: ", event.data);

@@ -83,7 +83,8 @@ html {
 }
 
 .board__game_option_label {
-  margin-bottom: -2%;
+  width: 100%;
+  margin-bottom: -0.5%;
 }
 
 .board__game_option_input {
