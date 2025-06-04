@@ -1,5 +1,6 @@
 package com.nowakartur97.battleshipgame.game;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import static com.nowakartur97.battleshipgame.game.WebSocketConfig.WEB_SOCKET_PA
 
 @Component
 @RequiredArgsConstructor
+@Getter
 @Slf4j
 public class GameWebSocketHandler extends TextWebSocketHandler {
 
@@ -55,6 +57,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private String getGameId(final WebSocketSession session) {
-        return session.getUri().getPath().split(WEB_SOCKET_PATH)[1];
+        return session.getUri().getPath().split(WEB_SOCKET_PATH + "/")[1];
     }
 }
