@@ -37,7 +37,7 @@
             id="join_game_button_first_step"
             class="board__game_option_button"
           >
-            Join other player game
+            Join the game
           </button>
           <div class="board__content_wrapper">
             <label
@@ -47,6 +47,7 @@
               >Game id:</label
             >
             <input id="join_game_input" class="board__game_option_input" />
+            <p id="join_game_message" class="board__message"></p>
           </div>
           <div class="board__content_wrapper">
             <p class="board__ship_name"></p>
@@ -65,7 +66,7 @@
           </div>
           <div class="board__squares">
             <div class="board__squares_wait_container">
-              <p class="board__message"></p>
+              <p id="other_player_info_message" class="board__message"></p>
             </div>
           </div>
         </div>

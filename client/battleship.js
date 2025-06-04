@@ -365,6 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
     #joinGameSecondStepBtn;
     #joinGameInput;
     #joinGameLabel;
+    #joinGameMessage;
     #waitContainer;
     #boardMessage;
     #horizontalShipPlacementBtn;
@@ -397,10 +398,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       this.#joinGameInput = document.querySelector("#join_game_input");
       this.#joinGameLabel = document.querySelector("#join_game_label");
+      this.#joinGameMessage = document.querySelector("#join_game_message");
       this.#waitContainer = document.querySelector(
         ".board__squares_wait_container"
       );
-      this.#boardMessage = document.querySelector(".board__message");
+      this.#boardMessage = document.querySelector("#other_player_info_message");
       this.#enemyBoard = document.querySelector(
         ".board--enemy .board__squares"
       );
@@ -439,11 +441,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (this.#joinGameInput.value === "") {
           return;
         }
-        this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
-        this.#toggleOnOffElement(this.#joinGameInput);
-        this.#toggleOnOffElement(this.#joinGameLabel);
-        this.#game.gameId = this.#joinGameInput.value;
-        this.generatePlayerBoard();
+        const gameId = this.#joinGameInput.value;
+        fetch(`http://localhost:8080/game/${gameId}`).then((response) => {
+          if (!response.ok) {
+            this.#joinGameMessage.style.display = "block";
+            this.#joinGameMessage.innerHTML = `Game with id: <span class='board__game_id'>${gameId}</span> not found`;
+            return;
+          } else {
+            this.#joinGameMessage.style.display = "none";
+            this.#toggleOnOffElement(this.#joinGameSecondStepBtn);
+            this.#toggleOnOffElement(this.#joinGameInput);
+            this.#toggleOnOffElement(this.#joinGameLabel);
+            this.#game.gameId = gameId;
+            this.generatePlayerBoard();
+          }
+        });
       });
       this.#horizontalShipPlacementBtn = document.querySelector(
         "#horizontal_ship_placement_button"
