@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
     #joinGameInput;
     #joinGameLabel;
     #joinGameMessage;
-    #waitContainer;
+    #messageContainer;
     #boardMessage;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
@@ -399,8 +399,8 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#joinGameInput = document.querySelector("#join_game_input");
       this.#joinGameLabel = document.querySelector("#join_game_label");
       this.#joinGameMessage = document.querySelector("#join_game_message");
-      this.#waitContainer = document.querySelector(
-        ".board__squares_wait_container"
+      this.#messageContainer = document.querySelector(
+        ".board__squares_message_container"
       );
       this.#boardMessage = document.querySelector("#other_player_info_message");
       this.#enemyBoard = document.querySelector(
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#joinGameInput);
       this.#toggleOnOffElement(this.#joinGameLabel);
       this.#toggleOnOffElement(this.#joinGameMessage);
-      this.#toggleOnOffElement(this.#waitContainer);
+      this.#toggleOnOffElement(this.#messageContainer);
       this.#toggleOnOffElement(this.#boardMessage);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
@@ -681,6 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
     displayResult(result) {
       this.#resultMessageContainer.style.display = "flex";
       this.#resultMessage.textContent = result ? "You won" : "You lose";
+      this.#messageContainer.style.display = "none";
     }
 
     changeEnemySquareClass(square, isHit) {
@@ -792,13 +793,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     displayMessage(message) {
-      this.#waitContainer.style.display = "flex";
+      this.#messageContainer.style.display = "flex";
       this.#boardMessage.style.display = "block";
       this.#boardMessage.innerHTML = message;
     }
 
-    hideMessageContainer() {
-      this.#toggleOnOffElement(this.#waitContainer);
+    toggleMessageContainer() {
+      this.#toggleOnOffElement(this.#messageContainer);
       this.#toggleOnOffElement(this.#boardMessage);
     }
 
@@ -851,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (status) {
           case WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description: {
             if (data.from !== this.#game.player.name) {
-              this.#board.hideMessageContainer(false);
+              this.#board.toggleMessageContainer(false);
             }
             break;
           }
@@ -902,7 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   from: this.#game.player.name,
                 });
               } else if (!data.result) {
-                this.#board.hideMessageContainer();
+                this.#board.toggleMessageContainer();
                 this.#game.player.hasTurn = true;
               }
             }

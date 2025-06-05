@@ -172,7 +172,7 @@ html {
   background-color: hsl(250, 100%, 50%);
 }
 
-.board__squares_wait_container {
+.board__squares_message_container {
   position: absolute;
   top: 0;
   left: 0;
