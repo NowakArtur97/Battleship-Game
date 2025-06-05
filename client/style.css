@@ -198,7 +198,12 @@ html {
   color: hsl(0, 100%, 50%);
 }
 
-.board__result_message__container {
+.board__game_id--big {
+  font-size: 4.5rem;
+  color: hsl(0, 100%, 50%);
+}
+
+.board__global_message__container {
   position: absolute;
   top: 0;
   left: 0;
@@ -210,10 +215,11 @@ html {
   background-color: hsla(0, 0%, 0%, 0.75);
 }
 
-.board__result_message {
+.board__global_message {
   padding: 1.25% 2.5%;
+  text-align: center;
   color: hsl(0, 0%, 100%);
-  font-size: 4.5rem;
+  font-size: 3.5rem;
 }
 
 @media (orientation: landscape) {
@@ -250,7 +256,11 @@ html {
     font-size: 2rem;
   }
 
-  .board__result_message {
+  .board__global_message {
+    font-size: 5rem;
+  }
+
+  .board__game_id--big {
     font-size: 6rem;
   }
 }
@@ -273,7 +283,11 @@ html {
     font-size: 2.5rem;
   }
 
-  .board__result_message {
+  .board__global_message {
+    font-size: 6.5rem;
+  }
+
+  .board__game_id--big {
     font-size: 7.5rem;
   }
 }

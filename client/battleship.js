@@ -366,13 +366,13 @@ document.addEventListener("DOMContentLoaded", () => {
     #joinGameInput;
     #joinGameLabel;
     #joinGameMessage;
-    #messageContainer;
+    #boardMessageContainer;
     #boardMessage;
     #horizontalShipPlacementBtn;
     #verticalShipPlacementBtn;
     #shipToPlaceName;
-    #resultMessageContainer;
-    #resultMessage;
+    #globalMessageContainer;
+    #globalMessage;
 
     constructor() {
       this.#playerBoard = document.querySelector(
@@ -399,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#joinGameInput = document.querySelector("#join_game_input");
       this.#joinGameLabel = document.querySelector("#join_game_label");
       this.#joinGameMessage = document.querySelector("#join_game_message");
-      this.#messageContainer = document.querySelector(
+      this.#boardMessageContainer = document.querySelector(
         ".board__squares_message_container"
       );
       this.#boardMessage = document.querySelector("#other_player_info_message");
@@ -425,9 +425,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const gameId = generateRandomString();
         this.#game.gameId = gameId;
         this.generatePlayerBoard();
-        this.#toggleOnOffElement(this.#boardMessage);
-        this.displayMessage(
-          `Waiting for a second player to join your game. Game id: <span class='board__game_id'>${gameId}</span>`
+        this.displayGlobalMessage(
+          `Waiting for a second player to join your game. Game id: <span class='board__game_id--big'>${gameId}</span>`
         );
         this.#game.gameOwnerName = this.#game.player.name;
       });
@@ -465,10 +464,10 @@ document.addEventListener("DOMContentLoaded", () => {
         "#vertital_ship_placement_button"
       );
       this.#shipToPlaceName = document.querySelector(".board__ship_name");
-      this.#resultMessageContainer = document.querySelector(
-        ".board__result_message__container"
+      this.#globalMessageContainer = document.querySelector(
+        ".board__global_message__container"
       );
-      this.#resultMessage = document.querySelector(".board__result_message");
+      this.#globalMessage = document.querySelector(".board__global_message");
       this.#playerBoardGrid = [];
       this.#enemyBoardGrid = [];
     }
@@ -482,12 +481,11 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#toggleOnOffElement(this.#joinGameInput);
       this.#toggleOnOffElement(this.#joinGameLabel);
       this.#toggleOnOffElement(this.#joinGameMessage);
-      this.#toggleOnOffElement(this.#messageContainer);
-      this.#toggleOnOffElement(this.#boardMessage);
+      this.#toggleOnOffElement(this.#boardMessageContainer);
       this.#toggleOnOffElement(this.#horizontalShipPlacementBtn);
       this.#toggleOnOffElement(this.#verticalShipPlacementBtn);
       this.#toggleOnOffElement(this.#shipToPlaceName);
-      this.#toggleOnOffElement(this.#resultMessageContainer);
+      this.#toggleOnOffElement(this.#globalMessageContainer);
     }
 
     #startGameMode(chosenGameMode) {
@@ -679,9 +677,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     displayResult(result) {
-      this.#resultMessageContainer.style.display = "flex";
-      this.#resultMessage.textContent = result ? "You won" : "You lose";
-      this.#messageContainer.style.display = "none";
+      this.#globalMessageContainer.style.display = "flex";
+      this.#globalMessage.textContent = result ? "You won" : "You lose";
+      this.#boardMessageContainer.style.display = "none";
     }
 
     changeEnemySquareClass(square, isHit) {
@@ -793,14 +791,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     displayMessage(message) {
-      this.#messageContainer.style.display = "flex";
-      this.#boardMessage.style.display = "block";
+      this.#boardMessageContainer.style.display = "flex";
       this.#boardMessage.innerHTML = message;
     }
 
     toggleMessageContainer() {
-      this.#toggleOnOffElement(this.#messageContainer);
-      this.#toggleOnOffElement(this.#boardMessage);
+      this.#toggleOnOffElement(this.#boardMessageContainer);
+    }
+
+    displayGlobalMessage(message) {
+      this.#globalMessageContainer.style.display = "flex";
+      this.#globalMessage.innerHTML = message;
+    }
+
+    hideGlobalMessageContainer() {
+      this.#globalMessageContainer.style.display = "none";
     }
 
     #toggleOnOffElement(element) {
@@ -852,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (status) {
           case WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description: {
             if (data.from !== this.#game.player.name) {
-              this.#board.toggleMessageContainer(false);
+              this.#board.hideGlobalMessageContainer();
             }
             break;
           }
