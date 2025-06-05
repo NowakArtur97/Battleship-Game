@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     constructor() {
       this.#ships = [
+        // TODO:
         // new Ship("carrier", 5), new Ship("battleship", 4),
         // new Ship("cruiser", 3),
         // new Ship("submarine", 3),
@@ -347,7 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#webSocketManager.sendMessage({
         status: WebSocketManager.MESSAGE_STATUS.START_GAME.description,
         from: game.player.name,
-        gameId: game.gameId,
       });
     }
   }
@@ -844,14 +844,10 @@ document.addEventListener("DOMContentLoaded", () => {
         this.sendMessage({
           status: WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description,
           from: this.#game.player.name,
-          gameId,
         });
       };
       this.#socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.gameId !== gameId) {
-          return;
-        }
         console.log("Received message: ", event.data);
         const status = data.status;
         switch (status) {
@@ -940,7 +936,6 @@ document.addEventListener("DOMContentLoaded", () => {
           500
         );
       } else {
-        data.gameId = this.#game.gameId;
         console.log("Sending message:", data);
         this.#socket.send(JSON.stringify(data));
       }
