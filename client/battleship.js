@@ -426,8 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#game.gameId = gameId;
         this.generatePlayerBoard();
         this.#toggleOnOffElement(this.#boardMessage);
-        this.#waitContainer.style.display = "flex";
-        this.#boardMessage.innerHTML = `Waiting for a second player to join your game. Game id: <span class='board__game_id'>${gameId}</span>`;
+        this.displayMessage(
+          `Waiting for a second player to join your game. Game id: <span class='board__game_id'>${gameId}</span>`
+        );
         this.#game.gameOwnerName = this.#game.player.name;
       });
       this.#joinGameFirstStepBtn.addEventListener("click", () => {
@@ -790,6 +791,12 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+    displayMessage(message) {
+      this.#waitContainer.style.display = "flex";
+      this.#boardMessage.style.display = "block";
+      this.#boardMessage.innerHTML = message;
+    }
+
     hideMessageContainer() {
       this.#toggleOnOffElement(this.#waitContainer);
       this.#toggleOnOffElement(this.#boardMessage);
@@ -852,7 +859,10 @@ document.addEventListener("DOMContentLoaded", () => {
             this.#game.hasGameStarted = true;
             if (this.#game.player.name === this.#game.gameOwnerName) {
               this.#game.player.hasTurn = true;
-              console.log("gameOwnerName");
+            } else {
+              this.#board.displayMessage(
+                `Waiting for the opponent's turn to end`
+              );
             }
             break;
           }
@@ -878,6 +888,9 @@ document.addEventListener("DOMContentLoaded", () => {
               );
               this.#board.changeEnemySquareClass(square, data.result);
               if (!data.result) {
+                this.#board.displayMessage(
+                  `Waiting for the opponent's turn to end`
+                );
                 this.#game.player.hasTurn = false;
               }
             } else {
@@ -889,6 +902,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   from: this.#game.player.name,
                 });
               } else if (!data.result) {
+                this.#board.hideMessageContainer();
                 this.#game.player.hasTurn = true;
               }
             }
