@@ -325,7 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set gameId(gameId) {
       this.#gameId = gameId;
-      this.#webSocketManager.initializeMethods();
     }
 
     get gameOwnerName() {
@@ -349,6 +348,10 @@ document.addEventListener("DOMContentLoaded", () => {
         status: WebSocketManager.MESSAGE_STATUS.START_GAME.description,
         from: game.player.name,
       });
+    }
+
+    initializeWebSocketManager() {
+      this.#webSocketManager.initializeMethods();
     }
   }
 
@@ -424,6 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#toggleOnOffElement(this.#joinGameFirstStepBtn);
         const gameId = generateRandomString();
         this.#game.gameId = gameId;
+        this.#game.initializeWebSocketManager();
         this.generatePlayerBoard();
         this.displayGlobalMessage(
           `Waiting for a second player to join your game. Game id: <span class='board__game_id--big'>${gameId}</span>`
@@ -453,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.#toggleOnOffElement(this.#joinGameInput);
             this.#toggleOnOffElement(this.#joinGameLabel);
             this.#game.gameId = gameId;
+            this.#game.initializeWebSocketManager();
             this.generatePlayerBoard();
           }
         });
