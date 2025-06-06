@@ -9,6 +9,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (sessions.isEmpty()) {
             games.remove(gameId);
         }
+        sessions.stream().filter(WebSocketSession::isOpen).forEach(s -> {
+            try {
+                s.sendMessage(new TextMessage(String.format("{\"status\":\"leave_game\", \"gameId\":\"%s\"}", gameId)));
+            } catch (final IOException e) {
+            }
+        });
     }
 
     @Override
