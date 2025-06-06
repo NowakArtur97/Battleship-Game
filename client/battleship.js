@@ -127,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#fleet = new Fleet();
       this.#name = generateRandomString();
       this.#hasTurn = false;
-      console.log(this.#name);
     }
 
     get areAllShipsPlacedOnBoard() {
@@ -642,7 +641,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const enemyAttackPosition = game.enemy.getShotPosition();
                 const playerShip = game.player.takeHit(enemyAttackPosition);
                 shouldTakeTurn = playerShip !== undefined;
-                console.log(enemyAttackPosition);
                 this.changePlayerSquareClass(
                   enemyAttackPosition.asString,
                   shouldTakeTurn
@@ -826,6 +824,7 @@ document.addEventListener("DOMContentLoaded", () => {
   class WebSocketManager {
     static MESSAGE_STATUS = Object.freeze({
       JOIN_GAME: Symbol("join_game"),
+      LEAVE_GAME: Symbol("leave_game"),
       START_GAME: Symbol("start_game"),
       ATTACK_START: Symbol("attack_start"),
       ATTACK_RESULT: Symbol("attack_result"),
@@ -860,6 +859,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.from !== this.#game.player.name) {
               this.#board.hideGlobalMessageContainer();
             }
+            break;
+          }
+          case WebSocketManager.MESSAGE_STATUS.LEAVE_GAME.description: {
+            this.#board.displayGlobalMessage("The second player left the game");
             break;
           }
           case WebSocketManager.MESSAGE_STATUS.START_GAME.description: {
