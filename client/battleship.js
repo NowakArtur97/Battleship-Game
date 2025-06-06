@@ -429,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.#game.initializeWebSocketManager();
         this.generatePlayerBoard();
         this.displayGlobalMessage(
-          `Waiting for a second player to join your game. Game id: <span class='board__game_id--big'>${gameId}</span>`
+          `Waiting for the other player to join your game. Game id: <span class='board__game_id--big'>${gameId}</span>`
         );
         this.#game.gameOwnerName = this.#game.player.name;
       });
@@ -798,8 +798,8 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#boardMessage.innerHTML = message;
     }
 
-    toggleMessageContainer() {
-      this.#toggleOnOffElement(this.#boardMessageContainer);
+    hideMessageContainer() {
+      this.#boardMessageContainer.style.display = "none";
     }
 
     displayGlobalMessage(message) {
@@ -858,20 +858,27 @@ document.addEventListener("DOMContentLoaded", () => {
           case WebSocketManager.MESSAGE_STATUS.JOIN_GAME.description: {
             if (data.from !== this.#game.player.name) {
               this.#board.hideGlobalMessageContainer();
+              if (!this.#game.player.hasTurn) {
+                this.#board.displayMessage(
+                  `Waiting for the other player to place their ships`
+                );
+              }
             }
             break;
           }
           case WebSocketManager.MESSAGE_STATUS.LEAVE_GAME.description: {
-            this.#board.displayGlobalMessage("The second player left the game");
+            this.#board.hideMessageContainer();
+            this.#board.displayGlobalMessage("The other player left the game");
             break;
           }
           case WebSocketManager.MESSAGE_STATUS.START_GAME.description: {
             this.#game.hasGameStarted = true;
             if (this.#game.player.name === this.#game.gameOwnerName) {
               this.#game.player.hasTurn = true;
+              this.#board.hideMessageContainer();
             } else {
               this.#board.displayMessage(
-                `Waiting for the opponent's turn to end`
+                `Waiting for the other player's turn to end`
               );
             }
             break;
@@ -899,7 +906,7 @@ document.addEventListener("DOMContentLoaded", () => {
               this.#board.changeEnemySquareClass(square, data.result);
               if (!data.result) {
                 this.#board.displayMessage(
-                  `Waiting for the opponent's turn to end`
+                  `Waiting for the other player's turn to end`
                 );
                 this.#game.player.hasTurn = false;
               }
@@ -912,7 +919,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   from: this.#game.player.name,
                 });
               } else if (!data.result) {
-                this.#board.toggleMessageContainer();
+                this.#board.hideMessageContainer();
                 this.#game.player.hasTurn = true;
               }
             }
