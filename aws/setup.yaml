@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Battleship Game Template
+Parameters:
+  BattleshipGameWebsiteBucketName:
+    Type: String
+    Description: S3 Bucket name for battleship game website
+    Default: battleship-game-997
+Resources:
+  BattleshipGameWebsiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BattleshipGameWebsiteBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+  BattleshipGameWebsiteS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BattleshipGameWebsiteS3Bucket
+      PolicyDocument:
+        Id: BattleshipGameWebsiteS3BucketPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "arn:aws:s3:::${BattleshipGameWebsiteS3Bucket}/*"
+Outputs:
+  BattleshipGameWebsiteUrl:
+    Description: Battleship game website url
+    Value: !GetAtt BattleshipGameWebsiteS3Bucket.WebsiteURL
