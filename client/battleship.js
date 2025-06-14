@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   const SERVER_IP = "TEMP_SERVER_IP";
-  const BACKEND_IP =
-    SERVER_IP !== "TEMP_SERVER_IP" ? `${SERVER_IP}:8080` : "localhost:8080";
+  const BACKEND_IP = SERVER_IP.includes("SERVER_IP")
+    ? "localhost:8080"
+    : `${SERVER_IP}:8080`;
 
   function generateRandomString() {
     return (Math.random() + 1).toString(36).substring(7);
