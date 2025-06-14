@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const SERVER_IP = "TEMP_SERVER_IP";
+  const BACKEND_IP =
+    SERVER_IP !== "TEMP_SERVER_IP" ? `${SERVER_IP}:8080` : "localhost:8080";
+
   function generateRandomString() {
     return (Math.random() + 1).toString(36).substring(7);
   }
@@ -445,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         const gameId = this.#joinGameInput.value;
-        fetch(`http://localhost:8080/game/${gameId}`).then((response) => {
+        fetch(`http://${BACKEND_IP}/game/${gameId}`).then((response) => {
           if (!response.ok) {
             this.#joinGameMessage.style.display = "block";
             this.#joinGameMessage.innerHTML = `Game with id: <span class='board__game_id'>${gameId}</span> not found`;
@@ -842,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initializeMethods() {
       const gameId = this.#game.gameId;
-      this.#socket = new WebSocket(`ws://localhost:8080/ws/game/${gameId}`);
+      this.#socket = new WebSocket(`ws://${BACKEND_IP}/ws/game/${gameId}`);
       this.#socket.onopen = () => {
         console.log("Connected to game with id", gameId);
         this.sendMessage({
