@@ -17,6 +17,30 @@ Parameters:
     Type: String
     Description: Battleship game website files to copy from GitHub to main directory in S3 bucket
     Default: client/index.html,client/style.css,client/battleship.js
+  InstanceType:
+    Type: String
+    Description: EC2 instances size
+    Default: t2.micro
+  ImageId:
+    Type: String
+    Description: EC2 instances image id
+    Default: ami-09e6f87a47903347c
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance
+    Default: battleship-game
+  SshPort:
+    Type: Number
+    Description: SSH port
+    Default: 22
+    MinValue: 22
+    MaxValue: 65535
+  SourceCidr:
+    Type: String
+    Description: CIDR Block of IPv4 IP addresses allowed to access EC2 instances via SSH
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+    ConstraintDescription: The value must be valid IPv4 CIDR block.
+    Default: 0.0.0.0/32
 Resources:
   BattleshipGameWebsiteS3Bucket:
     Type: AWS::S3::Bucket
@@ -303,7 +327,29 @@ Resources:
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           IpProtocol: -1
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: battleship-game-ec2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install docker -y
+          service docker start
+          docker run -p 8080:8080 -t jooki997/battleship-game:1.0.0
 Outputs:
   BattleshipGameWebsiteUrl:
     Description: Battleship game website url
     Value: !GetAtt BattleshipGameWebsiteS3Bucket.WebsiteURL
+  BattleshipGameBackendServerPublicIp:
+    Description: Backend server EC2 instance public IP
+    Value: !GetAtt EC2Instance.PublicIp
