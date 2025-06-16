@@ -92,10 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     constructor() {
       this.#ships = [
-        // TODO:
-        // new Ship("carrier", 5), new Ship("battleship", 4),
-        // new Ship("cruiser", 3),
-        // new Ship("submarine", 3),
+        new Ship("carrier", 5),
+        new Ship("battleship", 4),
+        new Ship("cruiser", 3),
+        new Ship("submarine", 3),
         new Ship("destroyer", 2),
       ];
     }
@@ -255,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.#webSocketManager = webSocketManager;
     }
 
-    // TODO: remove method and send message from event listener (?)
     takeHit(position, from) {
       this.#webSocketManager.sendMessage({
         status: WebSocketManager.MESSAGE_STATUS.ATTACK_START.description,
