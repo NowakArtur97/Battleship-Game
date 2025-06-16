@@ -41,6 +41,10 @@ Parameters:
     AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
     ConstraintDescription: The value must be valid IPv4 CIDR block.
     Default: 0.0.0.0/32
+  FileWithBackendIP:
+    Type: String
+    Description: File with backend IP to be replaced by lambda function
+    Default: battleship.js
 Resources:
   BattleshipGameWebsiteS3Bucket:
     Type: AWS::S3::Bucket
@@ -346,6 +350,107 @@ Resources:
           yum install docker -y
           service docker start
           docker run -p 8080:8080 -t jooki997/battleship-game:1.0.0
+  ReplaceInS3BucketLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: ReplaceInS3BucketLambdaFunctionPolicies
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${BattleshipGameWebsiteS3Bucket}/*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+  ReplaceInS3BucketLambdaInvoke:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: GitHubToS3LambdaInvoke
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt ReplaceInS3BucketLambdaFunction.Arn
+  ReplaceInS3BucketLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Timeout: 60
+      Handler: index.lambda_handler
+      Role: !GetAtt ReplaceInS3BucketLambdaRole.Arn
+      Environment:
+        Variables:
+          FILE_NAME: !Ref FileWithBackendIP
+          BUCKET_NAME: !Ref BattleshipGameWebsiteS3Bucket
+          VALUES_TO_REPLACE: TEMP_SERVER_IP
+          VALUES_TO_BE_REPLACED: !Sub ${EC2Instance.PublicIp}
+      Code:
+        ZipFile: |
+          import os
+          import cfnresponse
+          import boto3
+
+          FILE_NAME = os.environ['FILE_NAME']
+          BUCKET_NAME = os.environ['BUCKET_NAME']
+          VALUES_TO_REPLACE = os.environ['VALUES_TO_REPLACE'].split(",")
+          VALUES_TO_BE_REPLACED = os.environ['VALUES_TO_BE_REPLACED'].split(",")
+
+          TMP_FILE_PATH = '/tmp/' + FILE_NAME
+
+          s3 = boto3.resource('s3')
+
+          def download_file():
+            bucket = s3.Bucket(BUCKET_NAME)
+            bucket.download_file(FILE_NAME, TMP_FILE_PATH)
+
+          def read_file():
+              with open(TMP_FILE_PATH, 'r') as file:
+                filedata = file.read()
+              return filedata
+
+          def reaplce_values_in_file(filedata):
+              for index, toReplace in enumerate(VALUES_TO_REPLACE):
+                toBeReplaced = VALUES_TO_BE_REPLACED[index]
+                filedata = filedata.replace(toReplace, toBeReplaced)
+                print("Changed value from: " + toReplace + " to: " + toBeReplaced + " in file: " + FILE_NAME)
+              return filedata
+
+          def save_new_values_to_file(filedata):
+              with open(TMP_FILE_PATH, 'w') as file:
+                file.write(filedata)
+
+          def upload_updated_file_to_s3():
+              s3.Object(BUCKET_NAME, FILE_NAME).put(Body=open(TMP_FILE_PATH, 'rb').read())
+
+          def lambda_handler(event, context):
+              responseData = {}
+              requestType = event['RequestType']
+              try:
+                if requestType == 'Create':
+                  download_file()
+                  filedata = read_file()
+                  filedata = reaplce_values_in_file(filedata)
+                  save_new_values_to_file(filedata)
+                  upload_updated_file_to_s3()
+                  print("Successfully updated file: " + FILE_NAME + " in bucket: " + BUCKET_NAME)
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+              except Exception as e:
+                print("Exception when updated file: " + FILE_NAME + " in bucket: " + BUCKET_NAME)
+                print(e)
+                cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
 Outputs:
   BattleshipGameWebsiteUrl:
     Description: Battleship game website url
