@@ -169,6 +169,8 @@ html {
 }
 
 .board__square--invalid .board__square_image {
+  background-image: url(assets/x-mark-48x48.png);
+  animation: none;
 }
 
 .board__square--player-hit .board__square_image {
