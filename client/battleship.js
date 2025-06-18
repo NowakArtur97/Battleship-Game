@@ -713,9 +713,11 @@ document.addEventListener("DOMContentLoaded", () => {
           square.classList.add(
             ...["board__square", `board__square--${squareType.description}`]
           );
-          const shipAnimation = document.createElement("div");
-          shipAnimation.classList.add("board__square_image");
-          square.appendChild(shipAnimation);
+          if (row !== 0 && column !== 0) {
+            const shipAnimation = document.createElement("div");
+            shipAnimation.classList.add("board__square_image");
+            square.appendChild(shipAnimation);
+          }
           const isInNotInFirstRowAndColumn = row !== 0 && column !== 0;
           if (isInNotInFirstRowAndColumn) {
             const position = new Position(column, row);
