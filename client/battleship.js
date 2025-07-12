@@ -92,10 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     constructor() {
       this.#ships = [
-        new Ship("carrier", 5),
-        new Ship("battleship", 4),
-        new Ship("cruiser", 3),
-        new Ship("submarine", 3),
+        // new Ship("carrier", 5),
+        // new Ship("battleship", 4),
+        // new Ship("cruiser", 3),
+        // new Ship("submarine", 3),
         new Ship("destroyer", 2),
       ];
     }
@@ -710,10 +710,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let rowOfSquares = [];
         for (let column = 0; column < 8; column++) {
           const square = document.createElement("div");
-          square.classList.add(
-            ...["board__square", `board__square--${squareType.description}`]
-          );
+          square.classList.add("board__square");
           if (row !== 0 && column !== 0) {
+            square.classList.add(`board__square--${squareType.description}`);
             const shipAnimation = document.createElement("div");
             shipAnimation.classList.add("board__square_image");
             square.appendChild(shipAnimation);
@@ -732,6 +731,18 @@ document.addEventListener("DOMContentLoaded", () => {
             square.textContent = String.fromCharCode(
               letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
             );
+          }
+          console.log(row, column);
+          if (
+            (row === 0 && column === 0) ||
+            (row === 0 && column !== 0) ||
+            (row !== 0 && column === 0)
+          ) {
+            const waterAnimation = document.createElement("div");
+            waterAnimation.classList.add(
+              ...["board__square_image", "board__square_image--water"]
+            );
+            square.appendChild(waterAnimation);
           }
           rowOfSquares[column] = square;
         }
