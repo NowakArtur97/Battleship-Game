@@ -141,14 +141,47 @@ html {
   height: 48px;
   width: 48px;
 
-  animation: spriteAnimation 0.4s steps(4) infinite;
+  animation: spriteAnimation4Frames 0.4s steps(4) infinite;
 }
 
-@keyframes spriteAnimation {
+@keyframes spriteAnimation4Frames {
   from {
     background-position: 0px;
   }
   to {
+    background-position: -192px;
+  }
+}
+
+@keyframes spriteWaterAnimation {
+  from {
+    background-image: url(assets/water-48x48.png);
+    background-position: 0px;
+  }
+  to {
+    background-image: url(assets/water-48x48.png);
+    background-position: -192px;
+  }
+}
+
+@keyframes spriteSinkingPlayerShipAnimation {
+  from {
+    background-image: url(assets/sinking-player-ship-48x48.png);
+    background-position: 0px;
+  }
+  to {
+    background-image: url(assets/sinking-player-ship-48x48.png);
+    background-position: -192px;
+  }
+}
+
+@keyframes spriteSinkingEnemyShipAnimation {
+  from {
+    background-image: url(assets/sinking-enemy-ship-48x48.png);
+    background-position: 0px;
+  }
+  to {
+    background-image: url(assets/sinking-enemy-ship-48x48.png);
     background-position: -192px;
   }
 }
@@ -162,7 +195,7 @@ html {
 }
 
 .board__square--valid .board__square_image {
-  background-image: url(assets/ship-48x48.png);
+  background-image: url(assets/player-ship-48x48.png);
 }
 
 .board__square--invalid .board__square_image,
@@ -173,11 +206,13 @@ html {
 }
 
 .board__square--player-hit .board__square_image {
-  background-image: url(assets/sunken-ship-48x48.png);
+  animation: spriteSinkingPlayerShipAnimation 0.4s steps(4) forwards,
+    spriteWaterAnimation 0.4s 0.4s steps(4) infinite;
 }
 
 .board__square--enemy-hit .board__square_image {
-  background-image: url(assets/sunken-enemy-ship-48x48.png);
+  animation: spriteSinkingEnemyShipAnimation 0.4s steps(4) forwards,
+    spriteWaterAnimation 0.4s 0.4s steps(4) infinite;
 }
 
 .board__square_image--water {
