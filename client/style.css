@@ -209,7 +209,6 @@ html {
 .board__square--invalid .board__square_image,
 .board__square--player-miss .board__square_image,
 .board__square--enemy-miss .board__square_image {
-  animation: none;
   background-image: url(assets/x-mark-48x48.png);
 }
 
