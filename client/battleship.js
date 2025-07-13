@@ -710,7 +710,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let rowOfSquares = [];
         for (let column = 0; column < 8; column++) {
           const square = document.createElement("div");
-          square.classList.add("board__square");
+          square.classList.add(
+            ...[
+              "board__square",
+              `board__square--${squareType.description}_text`,
+            ]
+          );
           if (row !== 0 && column !== 0) {
             square.classList.add(`board__square--${squareType.description}`);
             const shipAnimation = document.createElement("div");
@@ -732,7 +737,6 @@ document.addEventListener("DOMContentLoaded", () => {
               letterCounter.charCodeAt(letterCounter.length - 1) + row - 1
             );
           }
-          console.log(row, column);
           if (
             (row === 0 && column === 0) ||
             (row === 0 && column !== 0) ||

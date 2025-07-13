@@ -125,10 +125,18 @@ html {
   width: calc(50vh / 10);
 
   font-size: 1rem;
-  color: hsl(0, 0%, 100%);
+  font-weight: bold;
 
   transform: scale(0);
   animation: scaleUp 0.5s forwards;
+}
+
+.board__square--player_text {
+  color: hsl(125, 100%, 50%);
+}
+
+.board__square--enemy_text {
+  color: hsl(0, 100%, 50%);
 }
 
 @keyframes scaleUp {
@@ -141,10 +149,10 @@ html {
   height: 48px;
   width: 48px;
 
-  animation: spriteAnimation4Frames 0.4s steps(4) infinite;
+  animation: spriteAnimation 0.4s steps(4) infinite;
 }
 
-@keyframes spriteAnimation4Frames {
+@keyframes spriteAnimation {
   from {
     background-position: 0px;
   }
