@@ -4,6 +4,15 @@
   padding: 0;
 }
 
+:root {
+  --player-ship-sprite: url(assets/player-ship-48x48.png);
+  --player-sinking-ship-sprite: url(assets/sinking-player-ship-48x48.png);
+  --enemy-ship-sprite: url(assets/enemy-ship-48x48.png);
+  --enemy-sinking-ship-sprite: url(assets/sinking-enemy-ship-48x48.png);
+  --water-sprite: url(assets/water-48x48.png);
+  --x-mark-sprite: url(assets/x-mark-48x48.png);
+}
+
 html {
   font-size: 10px;
   font-family: "Open Sans", Arial, sans-serif;
@@ -163,53 +172,53 @@ html {
 
 @keyframes spriteWaterAnimation {
   from {
-    background-image: url(assets/water-48x48.png);
+    background-image: var(--water-sprite);
     background-position: 0px;
   }
   to {
-    background-image: url(assets/water-48x48.png);
+    background-image: var(--water-sprite);
     background-position: -192px;
   }
 }
 
 @keyframes spriteSinkingPlayerShipAnimation {
   from {
-    background-image: url(assets/sinking-player-ship-48x48.png);
+    background-image: var(--player-sinking-ship-sprite);
     background-position: 0px;
   }
   to {
-    background-image: url(assets/sinking-player-ship-48x48.png);
+    background-image: var(--player-sinking-ship-sprite);
     background-position: -192px;
   }
 }
 
 @keyframes spriteSinkingEnemyShipAnimation {
   from {
-    background-image: url(assets/sinking-enemy-ship-48x48.png);
+    background-image: var(--enemy-sinking-ship-sprite);
     background-position: 0px;
   }
   to {
-    background-image: url(assets/sinking-enemy-ship-48x48.png);
+    background-image: var(--enemy-sinking-ship-sprite);
     background-position: -192px;
   }
 }
 
 .board__square--player .board__square_image {
-  background-image: url(assets/water-48x48.png);
+  background-image: var(--water-sprite);
 }
 
 .board__square--enemy .board__square_image {
-  background-image: url(assets/enemy-ship-48x48.png);
+  background-image: var(--enemy-ship-sprite);
 }
 
 .board__square--valid .board__square_image {
-  background-image: url(assets/player-ship-48x48.png);
+  background-image: var(--player-ship-sprite);
 }
 
 .board__square--invalid .board__square_image,
 .board__square--player-miss .board__square_image,
 .board__square--enemy-miss .board__square_image {
-  background-image: url(assets/x-mark-48x48.png);
+  background-image: var(--x-mark-sprite);
 }
 
 .board__square--player-hit .board__square_image {
@@ -224,7 +233,7 @@ html {
 
 .board__square_image--water {
   position: absolute;
-  background-image: url(assets/water-48x48.png);
+  background-image: var(--water-sprite);
   z-index: -1;
 }
 
