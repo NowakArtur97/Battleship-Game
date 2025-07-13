@@ -5,12 +5,12 @@
 }
 
 :root {
-  --player-ship-sprite: url(assets/player-ship-48x48.png);
-  --player-sinking-ship-sprite: url(assets/sinking-player-ship-48x48.png);
-  --enemy-ship-sprite: url(assets/enemy-ship-48x48.png);
-  --enemy-sinking-ship-sprite: url(assets/sinking-enemy-ship-48x48.png);
-  --water-sprite: url(assets/water-48x48.png);
-  --x-mark-sprite: url(assets/x-mark-48x48.png);
+  --player-ship-sprite: url(assets/24x24/player-ship-24x24.png);
+  --player-sinking-ship-sprite: url(assets/24x24/player-sinking-ship-24x24.png);
+  --enemy-ship-sprite: url(assets/24x24/enemy-ship-24x24.png);
+  --enemy-sinking-ship-sprite: url(assets/24x24/enemy-sinking-ship-24x24.png);
+  --water-sprite: url(assets/24x24/water-24x24.png);
+  --x-mark-sprite: url(assets/24x24/x-mark-24x24.png);
 }
 
 html {
@@ -155,8 +155,8 @@ html {
 }
 
 .board__square_image {
-  height: 48px;
-  width: 48px;
+  height: 24px;
+  width: 24px;
 
   animation: spriteAnimation 0.4s steps(4) infinite;
 }
@@ -181,7 +181,7 @@ html {
   }
 }
 
-@keyframes spriteSinkingPlayerShipAnimation {
+@keyframes spritePlayerSinkingShipAnimation {
   from {
     background-image: var(--player-sinking-ship-sprite);
     background-position: 0px;
@@ -192,7 +192,7 @@ html {
   }
 }
 
-@keyframes spriteSinkingEnemyShipAnimation {
+@keyframes spriteEnemySinkingShipAnimation {
   from {
     background-image: var(--enemy-sinking-ship-sprite);
     background-position: 0px;
@@ -222,12 +222,12 @@ html {
 }
 
 .board__square--player-hit .board__square_image {
-  animation: spriteSinkingPlayerShipAnimation 0.4s steps(4) forwards,
+  animation: spritePlayerSinkingShipAnimation 0.4s steps(4) forwards,
     spriteWaterAnimation 0.4s 0.4s steps(4) infinite;
 }
 
 .board__square--enemy-hit .board__square_image {
-  animation: spriteSinkingEnemyShipAnimation 0.4s steps(4) forwards,
+  animation: spriteEnemySinkingShipAnimation 0.4s steps(4) forwards,
     spriteWaterAnimation 0.4s 0.4s steps(4) infinite;
 }
 
@@ -304,6 +304,20 @@ html {
 }
 
 @media (min-width: 720px) {
+  /* :root {
+    --player-ship-sprite: url(assets/48x48/player-ship-48x48.png);
+    --player-sinking-ship-sprite: url(assets/48x48/player-sinking-ship-48x48.png);
+    --enemy-ship-sprite: url(assets/48x48/enemy-ship-48x48.png);
+    --enemy-sinking-ship-sprite: url(assets/48x48/enemy-sinking-ship-48x48.png);
+    --water-sprite: url(assets/48x48/water-48x48.png);
+    --x-mark-sprite: url(assets/48x48/x-mark-48x48.png);
+  }
+
+  .board__square_image {
+    height: 48px;
+    width: 48px;
+  } */
+
   .board__game_option_button,
   .board__square,
   .board__ship_name,
