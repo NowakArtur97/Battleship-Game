@@ -11,6 +11,7 @@
   --enemy-sinking-ship-sprite: url(assets/24x24/enemy-sinking-ship-24x24.png);
   --water-sprite: url(assets/24x24/water-24x24.png);
   --x-mark-sprite: url(assets/24x24/x-mark-24x24.png);
+  --sprite-width: -96px;
 }
 
 html {
@@ -166,7 +167,7 @@ html {
     background-position: 0px;
   }
   to {
-    background-position: -192px;
+    background-position: var(--sprite-width);
   }
 }
 
@@ -177,7 +178,7 @@ html {
   }
   to {
     background-image: var(--water-sprite);
-    background-position: -192px;
+    background-position: var(--sprite-width);
   }
 }
 
@@ -188,7 +189,7 @@ html {
   }
   to {
     background-image: var(--player-sinking-ship-sprite);
-    background-position: -192px;
+    background-position: var(--sprite-width);
   }
 }
 
@@ -199,7 +200,7 @@ html {
   }
   to {
     background-image: var(--enemy-sinking-ship-sprite);
-    background-position: -192px;
+    background-position: var(--sprite-width);
   }
 }
 
@@ -311,6 +312,7 @@ html {
     --enemy-sinking-ship-sprite: url(assets/48x48/enemy-sinking-ship-48x48.png);
     --water-sprite: url(assets/48x48/water-48x48.png);
     --x-mark-sprite: url(assets/48x48/x-mark-48x48.png);
+    --sprite-width: -192px;
   }
 
   .board__square_image {
