@@ -304,7 +304,7 @@ html {
 }
 
 @media (min-width: 720px) {
-  /* :root {
+  :root {
     --player-ship-sprite: url(assets/48x48/player-ship-48x48.png);
     --player-sinking-ship-sprite: url(assets/48x48/player-sinking-ship-48x48.png);
     --enemy-ship-sprite: url(assets/48x48/enemy-ship-48x48.png);
@@ -316,7 +316,7 @@ html {
   .board__square_image {
     height: 48px;
     width: 48px;
-  } */
+  }
 
   .board__game_option_button,
   .board__square,
