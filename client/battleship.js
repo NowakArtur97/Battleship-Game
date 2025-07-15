@@ -545,7 +545,6 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.forEach((row) => {
         row.forEach((square) => {
           square.addEventListener("click", () => {
-            // TODO: Remove event listeners after placing all ships?
             if (game.player.areAllShipsPlacedOnBoard) {
               return;
             }

@@ -8,7 +8,7 @@ s3 = boto3.resource('s3')
 BUCKET_NAME = os.environ['BUCKET_NAME']
 GITHUB_URL = os.environ['GITHUB_URL']
 FILES_TO_COPY = os.environ['FILES_TO_COPY'].split(",")
-FILES_TO_COPY_TO_MAIN_DIRECTORY = os.environ['FILES_TO_COPY_TO_MAIN_DIRECTORY'].split(",")
+FOLDERS_TO_BE_SKIPPED = os.environ['FOLDERS_TO_BE_SKIPPED'].split(",")
 
 def save_to_local(url):
     urlPath = urlparse(url).path
@@ -64,8 +64,9 @@ def lambda_handler(event, context):
                 fileOnGitHub = GITHUB_URL + "/" + fileToCopy
                 print("File to copy: " + fileToCopy)
                 print("URL to file: " + fileOnGitHub)
-                folder = fileToCopy[:fileToCopy.rfind("/")] + '/' if fileToCopy not in FILES_TO_COPY_TO_MAIN_DIRECTORY and '/' in fileToCopy else ''
-                fileToCopy = fileToCopy.split("/")[len(fileToCopy.split("/")) - 1] if fileToCopy in FILES_TO_COPY_TO_MAIN_DIRECTORY else fileToCopy
+                folder = fileToCopy[:fileToCopy.rfind("/")] + '/' if '/' in fileToCopy else ''
+                for toSkip in FOLDERS_TO_BE_SKIPPED:
+                    folder = folder.replace(toSkip + "/", "")
                 contentType = resolve_content_type(fileToCopy)
                 copy_to_s3(fileOnGitHub, folder, contentType)
                 print("Successfully copied file: " + folder + '/' + fileToCopy + " to bucket: " + BUCKET_NAME)
